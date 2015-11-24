@@ -109,7 +109,6 @@ namespace JBooth
                   pjs.Add(new PaintJob(mf, r));
                }
             }
-
    		}
    		jobs = pjs.ToArray();
    		UpdateDisplayMode();

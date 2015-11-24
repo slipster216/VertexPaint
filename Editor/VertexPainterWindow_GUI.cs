@@ -214,7 +214,7 @@ namespace JBooth
             Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
          }
          brushSize = EditorGUILayout.Slider("Brush Size", brushSize, 0.01f, 10.0f);
-         brushFlow = EditorGUILayout.Slider("Brush Flow", brushFlow, 0.01f, 10.0f);
+         brushFlow = EditorGUILayout.Slider("Brush Flow", brushFlow, 0.1f, 128.0f);
 
 
 

@@ -10,7 +10,7 @@ namespace JBooth
    {
    	public bool          enabled;
    	public float         brushSize = 1;
-   	public float         brushFlow = 2;
+   	public float         brushFlow = 8;
    	public Color         brushColor = Color.red;
    	public int           brushValue = 255;
       public float         floatBrushValue = 1.0f;
@@ -89,7 +89,7 @@ namespace JBooth
 
    	void InitMeshes()
    	{
-         // revert old
+         // revert old materials
          for (int i = 0; i < jobs.Length; ++i)
          {
             jobs[i].renderer.sharedMaterial = jobs[i].originalMat;
@@ -478,15 +478,35 @@ namespace JBooth
    			}
    		}
 
-   		Handles.color = new Color(0, 0, 1, 0.5f);
+
+   		// set brush color
+         if (brushMode == BrushMode.Color)
+         {
+            Handles.color = new Color(brushColor.r, brushColor.g, brushColor.b, 0.4f);
+         }
+         else if (brushMode == BrushMode.ValueR || brushMode == BrushMode.ValueG || 
+                  brushMode == BrushMode.ValueB || brushMode == BrushMode.ValueA)
+         {
+            float v = (float)brushValue/255.0f;
+            Handles.color = new Color(v, v, v, 0.4f);
+         }
+         else
+         {
+            float v = (floatBrushValue-uvVisualizationRange.x) / Mathf.Max(0.00001f, uvVisualizationRange.y);
+            Handles.color = new Color(v, v, v, 0.4f);
+         }
+
+         // draw brush
    		Handles.SphereCap(0, point, Quaternion.identity, brushSize*2);
    		
+         // eat current event if mouse event and we're painting
    		if (Event.current.isMouse && painting)
    			Event.current.Use (); 
 
    		if (Event.current.type == EventType.layout)
    			HandleUtility.AddDefaultControl(GUIUtility.GetControlID(GetHashCode(), FocusType.Passive));
 
+         // update views
    		HandleUtility.Repaint();
    		sceneView.Repaint();
    	}

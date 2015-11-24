@@ -38,7 +38,7 @@ namespace JBooth
 
    	public Material vertexShaderMat;
 
-   	[MenuItem("Tools/Vertex Painter")]
+   	[MenuItem("Window/Vertex Painter")]
    	public static void ShowWindow()
    	{
    		var window = GetWindow<VertexPainterWindow>();

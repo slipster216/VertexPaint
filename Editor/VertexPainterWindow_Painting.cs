@@ -10,7 +10,7 @@ namespace JBooth
    {
    	public bool          enabled;
    	public float         brushSize = 1;
-   	public float         brushFlow = 1;
+   	public float         brushFlow = 2;
    	public Color         brushColor = Color.red;
    	public int           brushValue = 255;
       public float         floatBrushValue = 1.0f;

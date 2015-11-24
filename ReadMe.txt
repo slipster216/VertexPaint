@@ -8,7 +8,3 @@ Vertex Painter for Unity
 	You can easily remove the data from any channel by clicking on the button in the ‘clear channel’ menu, restoring the mesh to it’s original form. 
 	If “Show Vertex Data” is on, the display will update to show you the information you are currently painting. This will be displayed as a color when set to color mode and a black (0) to white (1) gradient on the R/G/B/A color channels. When painting values into one of the 4 UV coordinate sets, there is an option to set the display range. This is because UV coordinates, unlike colors, are given a full 32 bit value to work with and can represent information out of the 0-1 range. As such, the range options allow to to set the low and high value used to remap the range into a 0-1 display range.
 	The brush has sizing and flow options which should be self explanatory. The brush is also pressure sensitive if you are using a tablet which supports it. 
-
-
-
-	

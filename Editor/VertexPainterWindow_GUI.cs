@@ -279,8 +279,10 @@ namespace JBooth
       
       void OnDestroy() 
       {
-         showVertexShader = true;
+         bool show = showVertexShader;
+         showVertexShader = false;
          UpdateDisplayMode();
+         showVertexShader = show;
          DestroyImmediate(vertexShaderMat);
          SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
       }

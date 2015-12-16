@@ -87,6 +87,7 @@ public class VertexInstanceStream : MonoBehaviour
       if (mr != null && mf != null)
       {
          Mesh m = new Mesh();
+         m.hideFlags = HideFlags.HideAndDontSave;
          m.vertices = mf.sharedMesh.vertices;
 
          if (_colors != null && _colors.Length == mf.sharedMesh.vertexCount)

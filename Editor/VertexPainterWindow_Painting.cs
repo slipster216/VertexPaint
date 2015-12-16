@@ -119,6 +119,7 @@ namespace JBooth
    		if (vertexShaderMat == null)
    		{
    			vertexShaderMat = new Material(Shader.Find("Hidden/VertexColor"));
+            vertexShaderMat.hideFlags = HideFlags.HideAndDontSave;
    		}
    		for (int i = 0; i < jobs.Length; ++i)
    		{
@@ -459,6 +460,7 @@ namespace JBooth
    		if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && Event.current.alt == false)
    		{
    			painting = true;
+            Undo.RecordObject(stroke[i].stream, "Vertex Painter Stroke");
    		}
    		if (Event.current.type == EventType.MouseUp)
    		{
@@ -473,7 +475,6 @@ namespace JBooth
    		{
    			for (int i = 0; i < stroke.Count; ++i)
    			{
-               Undo.RecordObject(stroke[i].stream, "Vertex Painter Stroke");
    				PaintMesh(stroke[i], point);
    			}
    		}

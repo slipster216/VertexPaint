@@ -4,7 +4,7 @@ using UnityEditor;
 using System.Collections.Generic;
 
 
-namespace JBooth
+namespace JBooth.VertexPainterLite
 {
    public partial class VertexPainterWindow : EditorWindow 
    {
@@ -118,7 +118,7 @@ namespace JBooth
    	{
    		if (vertexShaderMat == null)
    		{
-   			vertexShaderMat = new Material(Shader.Find("Hidden/VertexColor"));
+   			vertexShaderMat = new Material(Shader.Find("Hidden/VertexPainterLite_Preview"));
             vertexShaderMat.hideFlags = HideFlags.HideAndDontSave;
    		}
    		for (int i = 0; i < jobs.Length; ++i)
@@ -326,14 +326,16 @@ namespace JBooth
          PrepBrushMode(j);
    		// convert point into local space, so we don't have to convert every point
    		point = j.renderer.transform.worldToLocalMatrix.MultiplyPoint(point);
-
+         float scale = 1.0f / j.renderer.transform.lossyScale.x;
+         
+         float bz = scale * brushSize;
    		// we could do a spacial hash for more speed
    		for (int i = 0; i < j.verts.Length; ++i)
    		{
    			float d = Vector3.Distance(point, j.verts[i]);
-   			if (d < brushSize)
+   			if (d < bz)
    			{
-   				float str = 1.0f - d/brushSize;
+   				float str = 1.0f - d/bz;
                float pressure = Event.current.pressure > 0 ? Event.current.pressure : 1.0f;
                PaintVert(j, i, str * (float)deltaTime * brushFlow * pressure);
    			}

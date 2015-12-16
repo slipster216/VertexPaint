@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 
 // https://gist.github.com/MattRix/9205bc62d558fef98045
-namespace JBooth
+namespace JBooth.VertexPainterLite
 {
    [InitializeOnLoad]
    public class RXLookingGlass

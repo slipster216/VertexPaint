@@ -39,7 +39,7 @@ using System.Collections.Generic;
 
 
 
-namespace JBooth
+namespace JBooth.VertexPainterLite
 {
    public partial class VertexPainterWindow : EditorWindow 
    {

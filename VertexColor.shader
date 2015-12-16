@@ -1,4 +1,4 @@
-﻿Shader "Hidden/VertexColor"
+﻿Shader "Hidden/VertexPainterLite_Preview"
 {
    Properties
    {

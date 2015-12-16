@@ -460,7 +460,10 @@ namespace JBooth
    		if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && Event.current.alt == false)
    		{
    			painting = true;
-            Undo.RecordObject(stroke[i].stream, "Vertex Painter Stroke");
+            for (int i = 0; i < stroke.Count; ++i)
+            {
+               Undo.RecordObject(stroke[i].stream, "Vertex Painter Stroke");
+            }
    		}
    		if (Event.current.type == EventType.MouseUp)
    		{

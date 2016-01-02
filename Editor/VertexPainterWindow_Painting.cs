@@ -92,7 +92,10 @@ namespace JBooth.VertexPainterLite
          // revert old materials
          for (int i = 0; i < jobs.Length; ++i)
          {
-            jobs[i].renderer.sharedMaterial = jobs[i].originalMat;
+            if (jobs[i].renderer != null)
+            {
+               jobs[i].renderer.sharedMaterial = jobs[i].originalMat;
+            }
          }
 
    		List<PaintJob> pjs = new List<PaintJob>();
@@ -462,14 +465,14 @@ namespace JBooth.VertexPainterLite
    		if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && Event.current.alt == false)
    		{
    			painting = true;
-            for (int i = 0; i < stroke.Count; ++i)
+            for (int i = 0; i < jobs.Length; ++i)
             {
-               Undo.RecordObject(stroke[i].stream, "Vertex Painter Stroke");
+               Undo.RegisterCompleteObjectUndo(jobs[i].stream, "Vertex Painter Stroke");
             }
    		}
    		if (Event.current.type == EventType.MouseUp)
    		{
-            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+            //Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
    			painting = false;
    		}
    		if (Event.current.type == EventType.MouseMove && Event.current.alt)

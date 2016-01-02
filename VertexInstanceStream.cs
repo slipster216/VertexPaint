@@ -56,6 +56,18 @@ namespace JBooth.VertexPainterLite
          Apply();
       }
 
+      void OnDestroy()
+      {
+         if (!Application.isPlaying)
+         {
+            MeshRenderer mr = GetComponent<MeshRenderer>();
+            if (mr != null)
+            {
+               mr.additionalVertexStreams = null;
+            }
+         }
+      }
+
       public void SetColor(Color[] iColors)
       {
          _colors = new Color[iColors.Length];

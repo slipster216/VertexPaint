@@ -2,6 +2,8 @@ Vertex Painter for Unity
 ©2015 Jason Booth
 Tested with Unity 5.3.2p2
 
+Example Video:
+https://www.youtube.com/watch?v=mtbCtwgI440&feature=youtu.be
 
 Additional Vertex Streams
 

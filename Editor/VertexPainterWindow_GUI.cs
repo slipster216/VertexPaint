@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEditor;
 using System.Collections.Generic;
@@ -39,11 +39,28 @@ using System.Collections.Generic;
 
 
 
-namespace JBooth.VertexPainterLite
+namespace JBooth.VertexPainterPro
 {
    public partial class VertexPainterWindow : EditorWindow 
    {
+      enum Tab
+      {
+         Paint = 0,
+         Deform,
+         Flow,
+         Bake,
+      }
 
+      string[] tabNames =
+      {
+         "Paint",
+         "Deform",
+         "Flow",
+         "Bake"
+      };
+
+
+      Tab tab = Tab.Paint;
       
       bool DrawClearButton(string label)
       {
@@ -54,20 +71,6 @@ namespace JBooth.VertexPainterLite
          return false;
       }
 
-      Mesh CopyMesh(Mesh mesh)
-      {
-         var copy = new Mesh();
-         foreach(var property in typeof(Mesh).GetProperties())
-         {
-            if(property.GetSetMethod() != null && property.GetGetMethod() != null)
-            {
-               property.SetValue(copy, property.GetValue(mesh, null), null);
-            }
-         }
-         copy.hideFlags = 0;
-         return copy;
-      }
-      
       void OnGUI()
       {
          
@@ -76,14 +79,48 @@ namespace JBooth.VertexPainterLite
             EditorGUILayout.LabelField("No objects selected. Please select an object with a MeshFilter and Renderer");
             return;
          }
+         DrawChannelGUI();
 
+         var ot = tab;
+         tab = (Tab)GUILayout.Toolbar((int)tab, tabNames);
+         if (ot != tab)
+         {
+            UpdateDisplayMode();
+         }
+         if (tab == Tab.Paint)
+         {
+            DrawPaintGUI();
+         }
+         else if (tab == Tab.Deform)
+         {
+            DrawDeformGUI();
+         }
+         else if (tab == Tab.Flow)
+         {
+            DrawFlowGUI();
+         }
+         else if (tab == Tab.Bake)
+         {
+            DrawBakeGUI();
+         }
+      }
+
+      void DrawChannelGUI()
+      {
+         EditorGUILayout.Separator();
+         GUI.skin.box.normal.textColor = Color.white;
+         GUILayout.Box("Vertex Painter", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(18)});
+         EditorGUILayout.Separator();
+         bool oldEnabled = enabled;
          if (Event.current.isKey && Event.current.keyCode == KeyCode.Escape && Event.current.type == EventType.KeyUp)
          {
             enabled = !enabled;
          }
-         
-         enabled = GUILayout.Toggle(enabled, "Enabled (ESC)");
-         
+         enabled = GUILayout.Toggle(enabled, "Active (ESC)");
+         if (enabled != oldEnabled)
+         {
+            InitMeshes();
+         }
          var oldShow = showVertexShader;
          showVertexShader = GUILayout.Toggle(showVertexShader, "Show Vertex Data");
          if (oldShow != showVertexShader)
@@ -96,32 +133,22 @@ namespace JBooth.VertexPainterLite
          bool hasUV1 = false;
          bool hasUV2 = false;
          bool hasUV3 = false;
+         bool hasPositions = false;
+         bool hasNormals = false;
          
          for (int i = 0; i < jobs.Length; ++i)
          {
             if (jobs[i]._stream != null)
             {
                int vertexCount = jobs[i].verts.Length;
-               if (jobs[i].stream.colors != null && jobs[i].stream.colors.Length == vertexCount)
-               {
-                  hasColors = true;
-               }
-               if (jobs[i].stream.uv0 != null && jobs[i].stream.uv0.Length == vertexCount)
-               {
-                  hasUV0 = true;
-               }
-               if (jobs[i].stream.uv1 != null && jobs[i].stream.uv1.Length == vertexCount)
-               {
-                  hasUV1 = true;
-               }
-               if (jobs[i].stream.uv2 != null && jobs[i].stream.uv2.Length == vertexCount)
-               {
-                  hasUV2 = true;
-               }
-               if (jobs[i].stream.uv3 != null && jobs[i].stream.uv3.Length == vertexCount)
-               {
-                  hasUV3 = true;
-               }
+               
+               hasColors = (jobs[i].stream.colors != null && jobs[i].stream.colors.Length == vertexCount);
+               hasUV0 = (jobs[i].stream.uv0 != null && jobs[i].stream.uv0.Count == vertexCount);
+               hasUV1 = (jobs[i].stream.uv1 != null && jobs[i].stream.uv1.Count == vertexCount);
+               hasUV2 = (jobs[i].stream.uv2 != null && jobs[i].stream.uv2.Count == vertexCount);
+               hasUV3 = (jobs[i].stream.uv3 != null && jobs[i].stream.uv3.Count == vertexCount);
+               hasPositions = (jobs[i].stream.positions != null && jobs[i].stream.positions.Length == vertexCount);
+               hasNormals = (jobs[i].stream.normals != null && jobs[i].stream.normals.Length == vertexCount);
             }
          }
          
@@ -177,19 +204,69 @@ namespace JBooth.VertexPainterLite
             }
             Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
          }
-         EditorGUILayout.EndHorizontal();
+         if (hasPositions && DrawClearButton("Pos"))
+         {
+            for (int i = 0; i < jobs.Length; ++i)
+            {
+               Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
+               jobs[i].stream.positions = null;
+               Mesh m = jobs[i].stream.GetModifierMesh();
+               if (m != null)
+                  m.vertices = jobs[i].meshFilter.sharedMesh.vertices;
+               jobs[i].stream.Apply();
+            }
+            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+         }
+         if (hasNormals && DrawClearButton("Norm"))
+         {
+            for (int i = 0; i < jobs.Length; ++i)
+            {
+               Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
+               jobs[i].stream.normals = null;
+               jobs[i].stream.tangents = null;
+               jobs[i].stream.Apply();
+            }
+            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+         }
          
+         EditorGUILayout.EndHorizontal();
+
+         EditorGUILayout.Separator();
+         GUILayout.Box("", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(1)});
+         EditorGUILayout.Separator();
+ 
+      }
+
+      void DrawBrushSettingsGUI()
+      {
+         brushSize      = EditorGUILayout.Slider("Brush Size", brushSize, 0.01f, 10.0f);
+         brushFlow      = EditorGUILayout.Slider("Brush Flow", brushFlow, 0.1f, 128.0f);
+         brushFalloff   = EditorGUILayout.Slider("Brush Falloff", brushFalloff, 0.1f, 4.0f);
+         if (tab == Tab.Paint && flowTarget != FlowTarget.ColorBA && flowTarget != FlowTarget.ColorRG)
+         {
+            flowRemap01 = EditorGUILayout.Toggle("use 0->1 mapping", flowRemap01);
+         }
+         EditorGUILayout.Separator();
+         GUILayout.Box("", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(1)});
+         EditorGUILayout.Separator();
+
+      }
+
+      void DrawPaintGUI()
+      {
+
+         GUILayout.Box("Brush Settings", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(20)});
          var oldBM = brushMode;
-         brushMode = (BrushMode)EditorGUILayout.EnumPopup("Brush Mode", brushMode);
+         brushMode = (BrushTarget)EditorGUILayout.EnumPopup("Target Channel", brushMode);
          if (oldBM != brushMode)
          {
             UpdateDisplayMode();
          }
-         if (brushMode == BrushMode.Color)
+         if (brushMode == BrushTarget.Color)
          {
             brushColor = EditorGUILayout.ColorField("Brush Color", brushColor);
          }
-         else if (brushMode == BrushMode.ValueR || brushMode == BrushMode.ValueG || brushMode == BrushMode.ValueB || brushMode == BrushMode.ValueA)
+         else if (brushMode == BrushTarget.ValueR || brushMode == BrushTarget.ValueG || brushMode == BrushTarget.ValueB || brushMode == BrushTarget.ValueA)
          {
             brushValue = (int)EditorGUILayout.Slider("Brush Value", (float)brushValue, 0.0f, 256.0f);
          }
@@ -203,7 +280,11 @@ namespace JBooth.VertexPainterLite
                UpdateDisplayMode();
             }
          }
-         
+ 
+         DrawBrushSettingsGUI();
+ 
+         //GUILayout.Box("", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(1)});
+         EditorGUILayout.BeginHorizontal();
          if (GUILayout.Button("Fill"))
          {
             for (int i = 0; i < jobs.Length; ++i)
@@ -213,12 +294,163 @@ namespace JBooth.VertexPainterLite
             }
             Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
          }
-         brushSize = EditorGUILayout.Slider("Brush Size", brushSize, 0.01f, 10.0f);
-         brushFlow = EditorGUILayout.Slider("Brush Flow", brushFlow, 0.1f, 128.0f);
+         if (GUILayout.Button("Random"))
+         {
+            for (int i = 0; i < jobs.Length; ++i)
+            {
+               Undo.RecordObject(jobs[i].stream, "Vertex Painter Fill");
+               RandomMesh(jobs[i]);
+            }
+         }
+         EditorGUILayout.EndHorizontal();
+
+      }
+
+      void DrawDeformGUI()
+      {
+         GUILayout.Box("Brush Settings", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(20)});
+         pull = (Event.current.shift);
+
+         vertexMode = (VertexMode)EditorGUILayout.EnumPopup("Vertex Mode", vertexMode);
+         vertexContraint = (VertexContraint)EditorGUILayout.EnumPopup("Vertex Constraint", vertexContraint);
+
+         DrawBrushSettingsGUI();
+
+         EditorGUILayout.LabelField(pull ? "Pull (shift)" : "Push (shift)");
+
+      }
+
+      void DrawFlowGUI()
+      {
+         GUILayout.Box("Brush Settings", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(20)});
+         var oldV = flowVisualization;
+         flowVisualization = (FlowVisualization)EditorGUILayout.EnumPopup("Visualize", flowVisualization);
+         if (flowVisualization != oldV)
+         {
+            UpdateDisplayMode();
+         }
+         var ft = flowTarget;
+         flowTarget = (FlowTarget)EditorGUILayout.EnumPopup("Target", flowTarget);
+         if (flowTarget != ft)
+         {
+            UpdateDisplayMode();
+         }
+         flowBrushType = (FlowBrushType)EditorGUILayout.EnumPopup("Mode", flowBrushType);
+
+         DrawBrushSettingsGUI();
+         EditorGUILayout.BeginHorizontal();
+         EditorGUILayout.Space();
+         
+         
+         
+         if (GUILayout.Button("Reset"))
+         {
+            Vector2 norm = new Vector2(0.5f, 0.5f);
+            
+            foreach (PaintJob job in jobs)
+            {
+               PrepBrushMode(job);
+               switch (flowTarget)
+               {
+                  case FlowTarget.ColorRG:
+                     job.stream.SetColorRG(norm, job.verts.Length); break;
+                  case FlowTarget.ColorBA:
+                     job.stream.SetColorBA(norm, job.verts.Length); break;
+                  case FlowTarget.UV0_XY:
+                     job.stream.SetUV0_XY(norm, job.verts.Length); break;
+                  case FlowTarget.UV0_ZW:
+                     job.stream.SetUV0_ZW(norm, job.verts.Length); break;
+                  case FlowTarget.UV1_XY:
+                     job.stream.SetUV1_XY(norm, job.verts.Length); break;
+                  case FlowTarget.UV1_ZW:
+                     job.stream.SetUV1_ZW(norm, job.verts.Length); break;
+                  case FlowTarget.UV2_XY:
+                     job.stream.SetUV2_XY(norm, job.verts.Length); break;
+                  case FlowTarget.UV2_ZW:
+                     job.stream.SetUV2_ZW(norm, job.verts.Length); break;
+                  case FlowTarget.UV3_XY:
+                     job.stream.SetUV3_XY(norm, job.verts.Length); break;
+                  case FlowTarget.UV3_ZW:
+                     job.stream.SetUV3_ZW(norm, job.verts.Length); break;
+               }
+            }
+         }
+         EditorGUILayout.Space();
+         EditorGUILayout.EndHorizontal();
+         
+      }
 
 
+      void DrawBakeGUI()
+      {
+         GUILayout.Box("Ambient Occlusion", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(20)});
+         brushMode = (BrushTarget)EditorGUILayout.EnumPopup("Target Channel", brushMode);
+         aoSamples = EditorGUILayout.IntSlider("Samples", aoSamples, 64, 1024);
+         EditorGUILayout.BeginHorizontal();
+         aoRange = EditorGUILayout.Vector2Field("Range", aoRange);
+         aoRange.x = Mathf.Max(aoRange.x, 0.0001f);
+         EditorGUILayout.EndHorizontal();
+         aoIntensity = EditorGUILayout.Slider("Intensity", aoIntensity, 0.25f, 4.0f);
+         bakeLighting = EditorGUILayout.Toggle("Bake Lighting", bakeLighting);
+         if (bakeLighting)
+         {
+            aoLightAmbient = EditorGUILayout.ColorField("Light Ambient", aoLightAmbient);
+         }
 
-         if (GUILayout.Button("Save Asset"))
+
+         EditorGUILayout.BeginHorizontal();
+         EditorGUILayout.Space();
+         if (GUILayout.Button("Bake"))
+         {
+            BakeAO();
+         }
+         EditorGUILayout.Space();
+         EditorGUILayout.EndHorizontal();
+
+         GUILayout.Space(10);
+         GUILayout.Box("Bake From Texture", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(20)});
+         bakingTex = EditorGUILayout.ObjectField("Texture", bakingTex, typeof(Texture2D), false) as Texture2D;
+
+         bakeSourceUV = (BakeSourceUV)EditorGUILayout.EnumPopup("Source UVs", bakeSourceUV);
+         bakeChannel = (BakeChannel)EditorGUILayout.EnumPopup("Bake To", bakeChannel);
+
+         EditorGUILayout.BeginHorizontal();
+         EditorGUILayout.Space();
+         if (GUILayout.Button("Bake"))
+         {
+            if (bakingTex != null)
+            {
+               BakeFromTexture();
+            }
+            else
+            {
+               EditorUtility.DisplayDialog("Error", "Baking texture is not set", "ok");
+            }
+         }
+         EditorGUILayout.Space();
+         EditorGUILayout.EndHorizontal();
+
+         GUILayout.Space(10);
+         GUILayout.Box("Bake Pivot", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(20)});
+         pivotTarget = (PivotTarget)EditorGUILayout.EnumPopup("Store in", pivotTarget);
+
+         EditorGUILayout.BeginHorizontal();
+         EditorGUILayout.Space();
+         if (GUILayout.Button("Bake"))
+         {
+            BakePivot();
+         }
+         EditorGUILayout.Space();
+         EditorGUILayout.EndHorizontal();
+
+         GUILayout.Space(10);
+         GUILayout.Box("Mesh Combiner", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(20)});
+         EditorGUILayout.BeginHorizontal();
+         if (GUILayout.Button("Combine Meshes"))
+         {
+            MergeMeshes();
+         }
+         if (GUILayout.Button("Combine and Save"))
          {
             if (jobs.Length != 0)
             {
@@ -226,43 +458,129 @@ namespace JBooth.VertexPainterLite
                if (!string.IsNullOrEmpty(path))
                {
                   path = FileUtil.GetProjectRelativePath(path);
-                  Mesh firstMesh = CopyMesh(jobs[0].meshFilter.sharedMesh);
-                  firstMesh.colors = jobs[0].stream.colors;
-                  firstMesh.uv = jobs[0].stream.uv0;
-                  firstMesh.uv2 = jobs[0].stream.uv1;
-                  firstMesh.uv3 = jobs[0].stream.uv2;
-                  firstMesh.uv4 = jobs[0].stream.uv3;
-                  
-                  AssetDatabase.CreateAsset(firstMesh, path);
-                  
-                  for (int i = 1; i < jobs.Length; ++i)
-                  {
-                     Mesh m = CopyMesh(jobs[i].meshFilter.sharedMesh);
-                     m.colors = jobs[i].stream.colors;
-                     m.colors = jobs[0].stream.colors;
-                     m.uv = jobs[0].stream.uv0;
-                     m.uv2 = jobs[0].stream.uv1;
-                     m.uv3 = jobs[0].stream.uv2;
-                     m.uv4 = jobs[0].stream.uv3;
-                     AssetDatabase.AddObjectToAsset(m, firstMesh);
-                  }
+                  GameObject go = MergeMeshes();
+                  Mesh m = go.GetComponent<MeshFilter>().sharedMesh;
+                  AssetDatabase.CreateAsset(m, path);
                   AssetDatabase.SaveAssets();
                   AssetDatabase.ImportAsset(path);
+                  DestroyImmediate(go);
                }
             }
          }
-         
+         EditorGUILayout.EndHorizontal();
+         GUILayout.Space(10);
+         GUILayout.Box("Mesh Save", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(20)});
+         EditorGUILayout.BeginHorizontal();
+         EditorGUILayout.Space();
+         if (GUILayout.Button("Save Mesh"))
+         {
+            SaveMesh();
+         }
+
+         EditorGUILayout.Space();
+         EditorGUILayout.EndHorizontal();
       }
-      
-      
+
+      void SaveMesh()
+      {
+         if (jobs.Length != 0)
+         {
+            string path = EditorUtility.SaveFilePanel("Save Asset", Application.dataPath, "models", "asset");
+            if (!string.IsNullOrEmpty(path))
+            {
+               path = FileUtil.GetProjectRelativePath(path);
+               Mesh firstMesh = BakeDownMesh(jobs[0].meshFilter.sharedMesh, jobs[0].stream);
+               
+               AssetDatabase.CreateAsset(firstMesh, path);
+               
+               for (int i = 1; i < jobs.Length; ++i)
+               {
+                  Mesh m = BakeDownMesh(jobs[i].meshFilter.sharedMesh, jobs[i].stream);
+                  AssetDatabase.AddObjectToAsset(m, firstMesh);
+               }
+               AssetDatabase.SaveAssets();
+               AssetDatabase.ImportAsset(path);
+            }
+         }
+      }
+
+      // copy a mesh, and bake it's vertex stream into the mesh data. 
+      Mesh BakeDownMesh(Mesh mesh, VertexInstanceStream stream)
+      {
+         var copy = new Mesh();
+         foreach(var property in typeof(Mesh).GetProperties())
+         {
+            if(property.GetSetMethod() != null && property.GetGetMethod() != null)
+            {
+               property.SetValue(copy, property.GetValue(mesh, null), null);
+            }
+         }
+         copy.hideFlags = 0;
+
+         copy.colors = stream.colors;
+         if (stream.uv0 != null) { copy.SetUVs(0, stream.uv0); }
+         if (stream.uv1 != null) { copy.SetUVs(1, stream.uv1); }
+         if (stream.uv2 != null) { copy.SetUVs(2, stream.uv2); }
+         if (stream.uv3 != null) { copy.SetUVs(3, stream.uv3); }
+
+         if (stream.positions != null && stream.positions.Length == copy.vertexCount)
+         {
+            copy.vertices = stream.positions;
+         }
+         if (stream.normals != null && stream.normals.Length == copy.vertexCount)
+         {
+            copy.normals = stream.normals;
+         }
+         if (stream.tangents != null && stream.tangents.Length == copy.vertexCount)
+         {
+            copy.tangents = stream.tangents;
+         }
+
+         return copy;
+      }
+
+      GameObject MergeMeshes()
+      {
+         if (jobs.Length == 0)
+            return null;
+         List<CombineInstance> meshes = new List<CombineInstance>();
+         for (int i = 0; i < jobs.Length; ++i)
+         {
+            Mesh m = BakeDownMesh(jobs[i].meshFilter.sharedMesh, jobs[i].stream);
+            CombineInstance ci = new CombineInstance();
+            ci.mesh = m;
+            ci.transform = jobs[i].meshFilter.transform.localToWorldMatrix;
+            meshes.Add(ci);
+         }
+
+         Mesh mesh = new Mesh();
+         mesh.CombineMeshes(meshes.ToArray());
+         GameObject go = new GameObject("Combined Mesh");
+         go.AddComponent<MeshRenderer>();
+         var mf = go.AddComponent<MeshFilter>();
+         mf.sharedMesh = mesh;
+         for (int i = 0; i < meshes.Count; ++i)
+         {
+            DestroyImmediate(meshes[i].mesh);
+         }
+         return go;
+      }
+
       void OnFocus() 
       {
+         if (painting)
+         {
+            EndStroke();
+         }
+
          SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
          SceneView.onSceneGUIDelegate += this.OnSceneGUI;
 
          Undo.undoRedoPerformed -= this.OnUndo;
          Undo.undoRedoPerformed += this.OnUndo;
+         this.titleContent = new GUIContent("Vertex Paint");
          Repaint();
+
       }
       
       void OnInspectorUpdate()
@@ -283,7 +601,7 @@ namespace JBooth.VertexPainterLite
          showVertexShader = false;
          UpdateDisplayMode();
          showVertexShader = show;
-         DestroyImmediate(vertexShaderMat);
+         DestroyImmediate(VertexInstanceStream.vertexShaderMat);
          SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
       }
    }

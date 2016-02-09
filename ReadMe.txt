@@ -5,6 +5,8 @@ Tested with Unity 5.3.2p2
 Example Video:
 https://www.youtube.com/watch?v=mtbCtwgI440&feature=youtu.be
 
+<a href='https://pledgie.com/campaigns/31113'><img alt='Donate to support this project' src='https://pledgie.com/campaigns/31113.png?skin_name=chrome' border='0' ></a>
+
 Additional Vertex Streams
 
 	This package allows you to paint information onto the vertices of a mesh in the Unity editor as well as modify any attribute of the mesh. It uses the new 'additionalVertexStream' system of Unity5, which allows you to override per-instance data on meshes without paying the cost of duplicating a full mesh. This makes it ideal for painting vertex information across many instances of a mesh. The tool also allows you to easily bake that information back to mesh assets if you'd prefer to make a modified mesh and store that in disk, instead of with the instance in the scene. 

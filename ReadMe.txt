@@ -5,7 +5,7 @@ Tested with Unity 5.3.2p2
 Example Video:
 https://www.youtube.com/watch?v=mtbCtwgI440&feature=youtu.be
 
-[Donate](https://pledgie.com/campaigns/31113)
+Donate: https://pledgie.com/campaigns/31113
 
 Additional Vertex Streams
 

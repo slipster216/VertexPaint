@@ -396,13 +396,13 @@ namespace JBooth.VertexPainterPro
                markNoLongerReadable = false;
             }
 
-            meshStream.UploadMeshData(markNoLongerReadable);
-            mr.additionalVertexStreams = meshStream;
+            stream.UploadMeshData(markNoLongerReadable);
+            mr.additionalVertexStreams = stream;
 
             Profiler.EndSample();
 
             Profiler.EndSample();
-            return meshStream;
+            return stream;
          }
          return null;
       }

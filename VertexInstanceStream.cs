@@ -399,9 +399,9 @@ namespace JBooth.VertexPainterPro
             stream.UploadMeshData(markNoLongerReadable);
             mr.additionalVertexStreams = stream;
 
-            Profiler.EndSample();
+            Profiler.EndSample(); // uploading mesh data
 
-            Profiler.EndSample();
+            Profiler.EndSample(); // creating additional vertex stream data
             return stream;
          }
          return null;

@@ -70,7 +70,7 @@ namespace JBooth.VertexPainterPro
       // Stored here to make copy/save behaviour work better - basically, if you copy a mesh around, you want to also
       // clone the original material otherwise it may have the preview material stuck on it forever. 
       [HideInInspector]
-      public Material         originalMaterial;
+      public Material[]       originalMaterial;
       public static Material  vertexShaderMat;
 
    #endif
@@ -85,9 +85,19 @@ namespace JBooth.VertexPainterPro
          MeshRenderer mr = GetComponent<MeshRenderer>();
          if (mr != null)
          {
-            if (mr.sharedMaterial != null && mr.sharedMaterial == vertexShaderMat && originalMaterial != null)
+            if (mr.sharedMaterials != null && mr.sharedMaterial == vertexShaderMat && originalMaterial != null
+               && originalMaterial.Length == mr.sharedMaterials.Length && originalMaterial.Length > 1)
             {
-               mr.sharedMaterial = originalMaterial;
+               Material[] mats = new Material[mr.sharedMaterials.Length];
+               for (int i = 0; i < mr.sharedMaterials.Length; ++i)
+               {
+                  mats[i] = originalMaterial[i];
+               }
+               mr.sharedMaterials = mats;
+            }
+            else
+            {
+               mr.sharedMaterial = originalMaterial[0];
             }
          }
    #endif

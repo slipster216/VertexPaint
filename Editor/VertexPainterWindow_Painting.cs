@@ -706,7 +706,19 @@ namespace JBooth.VertexPainterPro
          {
             meshFilter = mf;
             renderer = r;
-            stream.originalMaterial = r.sharedMaterial;
+            if (r.sharedMaterials != null && r.sharedMaterials.Length > 1)
+            {
+               stream.originalMaterial = new Material[r.sharedMaterials.Length];
+               for (int i = 0; i < r.sharedMaterials.Length; ++i)
+               {
+                  stream.originalMaterial[i] = r.sharedMaterials[i];
+               }
+            }
+            else
+            {
+               stream.originalMaterial = new Material[1];
+               stream.originalMaterial[0] = r.sharedMaterial;
+            }
             verts = mf.sharedMesh.vertices;
             normals = mf.sharedMesh.normals;
             tangents = mf.sharedMesh.tangents;
@@ -714,7 +726,6 @@ namespace JBooth.VertexPainterPro
             InitMeshConnections();
          }
       }
-
       
       public void RevertMat()
       {
@@ -723,7 +734,22 @@ namespace JBooth.VertexPainterPro
          {
             if (jobs[i].renderer != null)
             {
-               jobs[i].renderer.sharedMaterial = jobs[i].stream.originalMaterial;
+               var j = jobs[i];
+               if (j.renderer.sharedMaterials != null && j.stream.originalMaterial != null &&
+                   j.renderer.sharedMaterials.Length == j.stream.originalMaterial.Length &&
+                   j.stream.originalMaterial.Length > 1)
+               {
+                  Material[] mats = new Material[j.stream.originalMaterial.Length];
+                  for (int x = 0; x < jobs[i].renderer.sharedMaterials.Length; ++x)
+                  {
+                     mats[x] = j.stream.originalMaterial[x];
+                  }
+                  j.renderer.sharedMaterials = mats;
+               }
+               else
+               {
+                  jobs[i].renderer.sharedMaterial = jobs[i].stream.originalMaterial[0];
+               }
             }
          }
       }
@@ -767,16 +793,44 @@ namespace JBooth.VertexPainterPro
          {
             if (!showVertexShader)
             {
-               if (jobs[i].renderer)
+               var job = jobs[i];
+               if (job.renderer)
                {
-                  jobs[i].renderer.sharedMaterial = jobs[i].stream.originalMaterial;
+                  if (job.renderer.sharedMaterials != null && job.renderer.sharedMaterials.Length > 1 &&
+                      job.renderer.sharedMaterials.Length == job.stream.originalMaterial.Length)
+                  {
+                     Material[] mats = new Material[jobs[i].renderer.sharedMaterials.Length];
+
+                     for (int x = 0; x < job.renderer.sharedMaterials.Length; ++x)
+                     {
+                        mats[x] = job.stream.originalMaterial[x];
+                     }
+                     job.renderer.sharedMaterials = mats;
+                  }
+                  else
+                  {
+                     job.renderer.sharedMaterial = job.stream.originalMaterial[0];
+                  }
                }
             }
             else
             {
-               if (jobs[i].renderer != null)
+               var job = jobs[i];
+               if (job.renderer != null)
                {
-                  jobs[i].renderer.sharedMaterial = VertexInstanceStream.vertexShaderMat;
+                  if (job.renderer.sharedMaterials != null && job.renderer.sharedMaterials.Length > 1)
+                  {
+                     Material[] mats = new Material[job.renderer.sharedMaterials.Length];
+                     for (int x = 0; x < job.renderer.sharedMaterials.Length; ++x)
+                     {
+                        mats[x] = VertexInstanceStream.vertexShaderMat;
+                     }
+                     job.renderer.sharedMaterials = mats;
+                  }
+                  else
+                  {
+                     job.renderer.sharedMaterial = VertexInstanceStream.vertexShaderMat;
+                  }
                   VertexInstanceStream.vertexShaderMat.SetInt("_flowVisualization", (int)flowVisualization);
                   VertexInstanceStream.vertexShaderMat.SetInt("_tab", (int)tab);
                   VertexInstanceStream.vertexShaderMat.SetInt("_flowTarget", (int)flowTarget);

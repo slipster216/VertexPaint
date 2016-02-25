@@ -166,8 +166,8 @@ Shader "VertexPainter/SplatBlend_5Layer"
          o.Smoothness = lerp(lerp(lerp(lerp(_Glossiness1, _Glossiness2, b1), _Glossiness3, b2), _Glossiness4, b3), _Glossiness5, b4);
          o.Metallic = lerp(lerp(lerp(lerp(_Metallic1, _Metallic2, b1), _Metallic3, b2), _Metallic4, b3), _Metallic5, b4);
          #endif
-       
-          #if _EMISSION
+
+         #if _EMISSION
          fixed4 e1 = FETCH_TEX1(_Emissive1, uv1);
          fixed4 e2 = FETCH_TEX2(_Emissive2, uv2);
          fixed4 e3 = FETCH_TEX3(_Emissive3, uv3);

@@ -7,27 +7,40 @@ using System.Linq;
 public class SplatMapShaderGUI : ShaderGUI 
 {
 
-   void DrawLayer(MaterialEditor editor, int i, MaterialProperty[] props, string[] keyWords, bool hasGloss, bool isParallax, bool hasEmis)
+   void DrawLayer(MaterialEditor editor, int i, MaterialProperty[] props, string[] keyWords, Workflow workflow, bool hasGloss, bool hasSpec, bool isParallax, bool hasEmis)
    {
       EditorGUIUtility.labelWidth = 0f;
       var albedoMap = FindProperty ("_Tex" + i, props);
       var normalMap = FindProperty ("_Normal" + i, props);
       var smoothness = FindProperty("_Glossiness" + i, props);
-      var glossinessMap = FindProperty("_GlossinessTex" + i, props);
-      var metallic = FindProperty("_Metallic" + i, props);
+      var glossinessMap = FindProperty("_GlossinessTex" + i, props, false);
+      var metallic = FindProperty("_Metallic" + i, props, false);
       var emissionTex = FindProperty("_Emissive" + i, props);
       var emissionMult = FindProperty("_EmissiveMult" + i, props);
       var parallax = FindProperty("_Parallax" + i, props);
       var texScale = FindProperty("_TexScale" + i, props);
+      var specMap = FindProperty("_SpecGlossMap" + i, props, false);
+      var specColor = FindProperty("_SpecColor" + i, props, false);
 
-      //editor.TexturePropertySingleLine("Albedo (RGB) Height (A)", albedoMap);
       editor.TexturePropertySingleLine(new GUIContent("Albedo/Height"), albedoMap);
       editor.TexturePropertySingleLine(new GUIContent("Normal"), normalMap);
-      editor.TexturePropertySingleLine(new GUIContent("Metal(R)/Smoothness(A)"), glossinessMap);
-      if (!hasGloss)
+      if (workflow == Workflow.Metallic)
+      {
+         editor.TexturePropertySingleLine(new GUIContent("Metal(R)/Smoothness(A)"), glossinessMap);
+      }
+      else
+      {
+         editor.TexturePropertySingleLine(new GUIContent("Specular(RGB)/Gloss(A)"), specMap);
+      }
+      if (workflow == Workflow.Metallic && !hasGloss)
       { 
          editor.ShaderProperty(smoothness, "Smoothness");
          editor.ShaderProperty(metallic, "Metallic");
+      }
+      else if (workflow == Workflow.Specular && !hasSpec)
+      {
+         editor.ShaderProperty(smoothness, "Smoothness");
+         editor.ShaderProperty(specColor, "Specular Color");
       }
       editor.TexturePropertySingleLine(new GUIContent("Emission"), emissionTex);
       editor.ShaderProperty(emissionMult, "Emissive Multiplier");
@@ -43,6 +56,12 @@ public class SplatMapShaderGUI : ShaderGUI
       {
          editor.ShaderProperty(FindProperty("_Contrast"+i, props), "Interpolation Contrast");
       }
+   }
+
+   enum Workflow
+   {
+      Metallic = 0,
+      Specular
    }
 
    enum FlowChannel
@@ -66,16 +85,53 @@ public class SplatMapShaderGUI : ShaderGUI
       Material targetMat = materialEditor.target as Material;
       string[] keyWords = targetMat.shaderKeywords;
 
-      bool parallax = keyWords.Contains ("_PARALLAXMAP");
       int layerCount = 1;
-      if (targetMat.shader.name == "VertexPainter/SplatBlend_2Layer")
+      Workflow workflow = Workflow.Metallic;
+      if (targetMat.shader.name == "VertexPainter/SplatBlend_1Layer")
+      {
+         layerCount = 1;
+      }
+      else if (targetMat.shader.name == "VertexPainter/SplatBlend_2Layer")
+      {
          layerCount = 2;
+      }
       else if (targetMat.shader.name == "VertexPainter/SplatBlend_3Layer")
+      {
          layerCount = 3;
+      }
       else if (targetMat.shader.name == "VertexPainter/SplatBlend_4Layer")
+      {
          layerCount = 4;
+      }
       else if (targetMat.shader.name == "VertexPainter/SplatBlend_5Layer")
+      {
          layerCount = 5;
+      }
+      else if (targetMat.shader.name == "VertexPainter/SplatBlendSpecular_1Layer")
+      {
+         workflow = Workflow.Specular;
+         layerCount = 1;
+      }
+      else if (targetMat.shader.name == "VertexPainter/SplatBlendSpecular_2Layer")
+      {
+         workflow = Workflow.Specular;
+         layerCount = 2;
+      }
+      else if (targetMat.shader.name == "VertexPainter/SplatBlendSpecular_3Layer")
+      {
+         workflow = Workflow.Specular;
+         layerCount = 3;
+      }
+      else if (targetMat.shader.name == "VertexPainter/SplatBlendSpecular_4Layer")
+      {
+         workflow = Workflow.Specular;
+         layerCount = 4;
+      }
+      else if (targetMat.shader.name == "VertexPainter/SplatBlendSpecular_5Layer")
+      {
+         workflow = Workflow.Specular;
+         layerCount = 5;
+      }
 
       FlowChannel fchannel = FlowChannel.None;
       if (keyWords.Contains("_FLOW1"))
@@ -90,20 +146,33 @@ public class SplatMapShaderGUI : ShaderGUI
          fchannel = FlowChannel.Five;
 
       bool flowDrift = keyWords.Contains("_FLOWDRIFT");
+      bool parallax = keyWords.Contains ("_PARALLAXMAP");
       bool hasGloss = (HasTexture(layerCount, targetMat, "_GlossinessTex"));
+      bool hasSpec = (HasTexture(layerCount, targetMat, "_SpecGlossMap"));
       bool hasEmis = (HasTexture(layerCount, targetMat, "_Emissive"));
 
+
       EditorGUI.BeginChangeCheck();
+      Workflow oldWorkflow = workflow;
+      workflow = (Workflow)EditorGUILayout.EnumPopup("Workflow", workflow);
+
       int oldLayerCount = layerCount;
       layerCount = EditorGUILayout.IntField("Layer Count", layerCount);
-      if (oldLayerCount != layerCount)
+      if (oldLayerCount != layerCount || workflow != oldWorkflow)
       {
          if (layerCount < 1)
             layerCount = 1;
          if (layerCount > 5)
             layerCount = 5;
 
-         targetMat.shader = Shader.Find("VertexPainter/SplatBlend_" + layerCount + "Layer");
+         if (workflow == Workflow.Metallic)
+         {
+            targetMat.shader = Shader.Find("VertexPainter/SplatBlend_" + layerCount + "Layer");
+         }
+         else
+         {
+            targetMat.shader = Shader.Find("VertexPainter/SplatBlendSpecular_" + layerCount + "Layer");
+         }
          return;
       }
 
@@ -112,7 +181,7 @@ public class SplatMapShaderGUI : ShaderGUI
 
       for (int i = 0; i < layerCount; ++i)
       {
-         DrawLayer(materialEditor, i+1, props, keyWords, hasGloss, parallax, hasEmis);
+         DrawLayer(materialEditor, i+1, props, keyWords, workflow, hasGloss, hasSpec, parallax, hasEmis);
 
          EditorGUILayout.Space();
       }
@@ -144,15 +213,18 @@ public class SplatMapShaderGUI : ShaderGUI
          {
             newKeywords.Add("_NORMALMAP");
          }
-         if (hasGloss)
+         if (hasGloss && workflow == Workflow.Metallic)
          {
             newKeywords.Add("_METALLICGLOSSMAP");
+         }
+         if (hasSpec && workflow == Workflow.Specular)
+         {
+            newKeywords.Add("_SPECGLOSSMAP");
          }
          if (hasEmis)
          {
             newKeywords.Add("_EMISSION"); 
          }
-
          if (fchannel != FlowChannel.None)
          {
             newKeywords.Add("_FLOW" + (int)fchannel);
@@ -172,7 +244,8 @@ public class SplatMapShaderGUI : ShaderGUI
       for (int i = 0; i < numLayers; ++i)
       {
          int index = i+1;
-         if (mat.GetTexture(key + index.ToString()) != null)
+         string prop = key + index;
+         if (mat.HasProperty(prop) && mat.GetTexture(prop) != null)
             return true;
       }
       return false;

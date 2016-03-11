@@ -7,6 +7,7 @@ Shader "VertexPainter/SplatBlendSpecular_1Layer"
 {
    Properties {
       _Tex1 ("Albedo + Height", 2D) = "white" {}
+      _Tint1 ("Tint", Color) = (1, 1, 1, 1)
       [NoScaleOffset][Normal]_Normal1("Normal", 2D) = "bump" {}
       _Glossiness1 ("Smoothness", Range(0,1)) = 0.5
       _SpecColor1("Specular Color", Color) = (0.2, 0.2, 0.2, 0.2)
@@ -19,7 +20,6 @@ Shader "VertexPainter/SplatBlendSpecular_1Layer"
       
       _FlowSpeed ("Flow Speed", Float) = 0
       _FlowIntensity ("Flow Intensity", Float) = 1
-      
    }
    SubShader {
       Tags { "RenderType"="Opaque" }
@@ -66,6 +66,8 @@ Shader "VertexPainter/SplatBlendSpecular_1Layer"
          #endif
          c1 = FETCH_TEX1(_Tex1, uv1);
          #endif
+
+         c1 *= _Tint1;
 
          #if _SPECGLOSSMAP
          fixed4 g1 = FETCH_TEX1(_SpecGlossMap1, uv1);

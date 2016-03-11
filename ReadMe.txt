@@ -41,7 +41,7 @@ Shaders
 
 Each layer has controls for texture scaling, parallax height, and a contrast which controls the width of the blending area between each layer. 
 
-Finally, the shader allows you to designate one layer of the shader to flow mode. This distorts the texture along directional vectors painted into the third UV set (The first UV set is used for your UV mapping, and Unity uses the second UV set for enlighten data). This is useful to create flowing water, lava, or other effects. The flow layer contains controls for speed and intensity, allowing you to modify the effect globally across the material. 
+Finally, the shader allows you to designate one layer of the shader to flow mode. This distorts the texture along directional vectors painted into the third UV set (The first UV set is used for your UV mapping, and Unity uses the second UV set for enlighten data). This is useful to create flowing water, lava, or other effects. The flow layer contains controls for speed and intensity, allowing you to modify the effect globally across the material. The flow layer can optionally use alpha and refraction to distort the layers below it. The normal map will be used as the refraction direction.  
 
 The performance of this shader is highly variable based on how many layers you use and which features you enable. Features which are not used in any layers are compiled out; while a feature used on any layer is computed for every layer. In other words, if you don’t use emissive textures on any layer you won’t pay for the feature, but if you use it on one layer an emissive value will be sampled for every layer.
 

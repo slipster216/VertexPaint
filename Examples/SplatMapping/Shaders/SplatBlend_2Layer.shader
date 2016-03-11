@@ -7,6 +7,7 @@ Shader "VertexPainter/SplatBlend_2Layer"
 {
    Properties {
       _Tex1 ("Albedo + Height", 2D) = "white" {}
+      _Tint1 ("Tint", Color) = (1, 1, 1, 1)
       [NoScaleOffset][Normal]_Normal1("Normal", 2D) = "bump" {}
       _Glossiness1 ("Smoothness", Range(0,1)) = 0.5
       [NoScaleOffset]_GlossinessTex1("Metallic(R)/Smoothness(A)", 2D) = "black" {}
@@ -18,6 +19,7 @@ Shader "VertexPainter/SplatBlend_2Layer"
       
       
       _Tex2("Albedo + Height", 2D) = "white" {}
+      _Tint2 ("Tint", Color) = (1, 1, 1, 1)
       [NoScaleOffset][Normal]_Normal2("Normal", 2D) = "bump" {}
       _Glossiness2 ("Smoothness", Range(0,1)) = 0.5
       [NoScaleOffset]_GlossinessTex2("Metallic(R)/Smoothness(A)", 2D) = "black" {}
@@ -30,6 +32,8 @@ Shader "VertexPainter/SplatBlend_2Layer"
       
       _FlowSpeed ("Flow Speed", Float) = 0
       _FlowIntensity ("Flow Intensity", Float) = 1
+      _FlowAlpha ("Flow Alpha", Range(0, 1)) = 1
+      _FlowRefraction("Flow Refraction", Range(0, 0.3)) = 0.04
       
    }
    SubShader {
@@ -49,6 +53,7 @@ Shader "VertexPainter/SplatBlend_2Layer"
       // flow map keywords. 
       #pragma shader_feature __ _FLOW1 _FLOW2 
       #pragma shader_feature __ _FLOWDRIFT 
+      #pragma shader_feature __ _FLOWREFRACTION
 
       #include "SplatBlend_Shared.cginc"
       
@@ -73,7 +78,20 @@ Shader "VertexPainter/SplatBlend_2Layer"
          
          half b1 = HeightBlend(c1.a, c2.a, IN.color.r, _Contrast2);
 
-         #if _PARALLAXMAP && SHADER_TARGET > 20
+         // flow refraction; use difference in depth to control refraction amount, refetch all previous color textures if not parallaxing
+         #if _FLOW2
+            b1 *= _FlowAlpha;
+            #if _FLOWREFRACTION && _NORMALMAP
+               half4 rn = FETCH_TEX2 (_Normal2, uv2) - 0.5;
+               uv1 += rn.xy * b1 * _FlowRefraction;
+               #if !_PARALLAXMAP 
+                  c1 = FETCH_TEX1(_Tex1, uv1);
+               #endif
+            #endif
+         #endif
+
+
+         #if _PARALLAXMAP
          float parallax = lerp(_Parallax1, _Parallax2, b1);
          float2 offset = ParallaxOffset (lerp(c1.a, c2.a, b1), parallax, IN.viewDir);
          uv1 += offset;
@@ -86,7 +104,7 @@ Shader "VertexPainter/SplatBlend_2Layer"
          #endif
          #endif
          
-         fixed4 c = lerp(c1, c2, b1);
+         fixed4 c = lerp(c1 * _Tint1, c2 * _Tint2, b1);
          
          #if _METALLICGLOSSMAP
          fixed4 g1 = FETCH_TEX1(_GlossinessTex1, uv1);
@@ -107,7 +125,7 @@ Shader "VertexPainter/SplatBlend_2Layer"
          
          #if _NORMALMAP
          half4 n1 = FETCH_TEX1 (_Normal1, uv1);
-         half4 n2 = FETCH_TEX1 (_Normal2, uv2);
+         half4 n2 = FETCH_TEX2 (_Normal2, uv2);
          o.Normal = UnpackNormal(lerp(n1, n2, b1));
          #endif
          o.Albedo = c.rgb;

@@ -11,6 +11,7 @@ public class SplatMapShaderGUI : ShaderGUI
    {
       EditorGUIUtility.labelWidth = 0f;
       var albedoMap = FindProperty ("_Tex" + i, props);
+      var tint = FindProperty("_Tint" + i, props);
       var normalMap = FindProperty ("_Normal" + i, props);
       var smoothness = FindProperty("_Glossiness" + i, props);
       var glossinessMap = FindProperty("_GlossinessTex" + i, props, false);
@@ -23,6 +24,7 @@ public class SplatMapShaderGUI : ShaderGUI
       var specColor = FindProperty("_SpecColor" + i, props, false);
 
       editor.TexturePropertySingleLine(new GUIContent("Albedo/Height"), albedoMap);
+      editor.ShaderProperty(tint, "Tint");
       editor.TexturePropertySingleLine(new GUIContent("Normal"), normalMap);
       if (workflow == Workflow.Metallic)
       {
@@ -146,6 +148,7 @@ public class SplatMapShaderGUI : ShaderGUI
          fchannel = FlowChannel.Five;
 
       bool flowDrift = keyWords.Contains("_FLOWDRIFT");
+      bool flowRefraction = keyWords.Contains("_FLOWREFRACTION");
       bool parallax = keyWords.Contains ("_PARALLAXMAP");
       bool hasGloss = (HasTexture(layerCount, targetMat, "_GlossinessTex"));
       bool hasSpec = (HasTexture(layerCount, targetMat, "_SpecGlossMap"));
@@ -194,9 +197,20 @@ public class SplatMapShaderGUI : ShaderGUI
 
          var flowSpeed = FindProperty("_FlowSpeed", props);
          var flowIntensity = FindProperty("_FlowIntensity", props);
+         var flowAlpha = FindProperty("_FlowAlpha", props);
+         var flowRefract = FindProperty("_FlowRefraction", props);
 
          materialEditor.ShaderProperty(flowSpeed, "Flow Speed");
          materialEditor.ShaderProperty(flowIntensity, "Flow Intensity");
+         materialEditor.ShaderProperty(flowAlpha, "Flow Alpha");
+         if (layerCount > 1)
+         {
+            flowRefraction = EditorGUILayout.Toggle("Flow Refraction", flowRefraction);
+            if (flowRefraction)
+            {
+               materialEditor.ShaderProperty(flowRefract, "Refraction Amount");
+            }
+         }
          flowDrift = EditorGUILayout.Toggle("Flow Drift", flowDrift);
       }
 
@@ -233,6 +247,10 @@ public class SplatMapShaderGUI : ShaderGUI
          if (flowDrift)
          {
             newKeywords.Add("_FLOWDRIFT");
+         }
+         if (flowRefraction && layerCount > 1)
+         {
+            newKeywords.Add("_FLOWREFRACTION");
          }
          targetMat.shaderKeywords = newKeywords.ToArray ();
          EditorUtility.SetDirty (targetMat);

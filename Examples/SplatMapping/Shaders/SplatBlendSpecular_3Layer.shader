@@ -7,6 +7,7 @@ Shader "VertexPainter/SplatBlendSpecular_3Layer"
 {
    Properties {
       _Tex1 ("Albedo + Height", 2D) = "white" {}
+      _Tint1 ("Tint", Color) = (1, 1, 1, 1)
       [NoScaleOffset][Normal]_Normal1("Normal", 2D) = "bump" {}
       _Glossiness1 ("Smoothness", Range(0,1)) = 0.5
       _SpecColor1("Specular Color", Color) = (0.2, 0.2, 0.2, 0.2)
@@ -18,6 +19,7 @@ Shader "VertexPainter/SplatBlendSpecular_3Layer"
       
       
       _Tex2("Albedo + Height", 2D) = "white" {}
+      _Tint2 ("Tint", Color) = (1, 1, 1, 1)
       [NoScaleOffset][Normal]_Normal2("Normal", 2D) = "bump" {}
       _Glossiness2 ("Smoothness", Range(0,1)) = 0.5
       _SpecColor2("Specular Color", Color) = (0.2, 0.2, 0.2, 0.2)
@@ -30,6 +32,7 @@ Shader "VertexPainter/SplatBlendSpecular_3Layer"
       _Contrast2("Contrast", Range(0,0.99)) = 0.5
       
       _Tex3("Albedo + Height", 2D) = "white" {}
+      _Tint3 ("Tint", Color) = (1, 1, 1, 1)
       [NoScaleOffset][Normal]_Normal3("Normal", 2D) = "bump" {}
       _Glossiness3 ("Smoothness", Range(0,1)) = 0.5
       _SpecColor3("Specular Color", Color) = (0.2, 0.2, 0.2, 0.2)
@@ -42,6 +45,8 @@ Shader "VertexPainter/SplatBlendSpecular_3Layer"
       
       _FlowSpeed ("Flow Speed", Float) = 0
       _FlowIntensity ("Flow Intensity", Float) = 1
+      _FlowAlpha ("Flow Alpha", Range(0, 1)) = 1
+      _FlowRefraction("Flow Refraction", Range(0, 0.3)) = 0.04
       
    }
    SubShader {
@@ -61,7 +66,8 @@ Shader "VertexPainter/SplatBlendSpecular_3Layer"
       // flow map keywords. 
       #pragma shader_feature __ _FLOW1 _FLOW2 _FLOW3
       #pragma shader_feature __ _FLOWDRIFT 
-      #pragma target 3.0
+      #pragma shader_feature __ _FLOWREFRACTION
+
       #include "SplatBlend_Shared.cginc"
       
       void vert (inout appdata_full v, out Input o) 
@@ -88,6 +94,30 @@ Shader "VertexPainter/SplatBlendSpecular_3Layer"
          half b1 = HeightBlend(c1.a, c2.a, IN.color.r, _Contrast2);
          fixed h1 =  lerp(c1.a, c2.a, b1);
          half b2 = HeightBlend(h1, c3.a, IN.color.g, _Contrast3);
+
+         #if _FLOW2
+            b1 *= _FlowAlpha;
+            #if _FLOWREFRACTION && _NORMALMAP
+               half4 rn = FETCH_TEX2 (_Normal2, uv2) - 0.5;
+               uv1 += rn.xy * b1 * _FlowRefraction;
+               #if !_PARALLAXMAP 
+                  c1 = FETCH_TEX1(_Tex1, uv1);
+               #endif
+            #endif
+         #endif
+         #if _FLOW3
+            b2 *= _FlowAlpha;
+            #if _FLOWREFRACTION && _NORMALMAP
+               half4 rn = FETCH_TEX3 (_Normal3, uv3) - 0.5;
+               uv1 += rn.xy * b1 * _FlowRefraction;
+               uv2 += rn.xy * b2 * _FlowRefraction;
+               #if !_PARALLAXMAP 
+                  c1 = FETCH_TEX1(_Tex1, uv1);
+                  c2 = FETCH_TEX2(_Tex2, uv2);
+               #endif
+            #endif
+         #endif
+
  
          #if _PARALLAXMAP
          float parallax = lerp(lerp(_Parallax1, _Parallax2, b1), _Parallax3, b2);
@@ -104,7 +134,7 @@ Shader "VertexPainter/SplatBlendSpecular_3Layer"
          #endif
          #endif
          
-         fixed4 c = lerp(lerp(c1, c2, b1), c3, b2);
+         fixed4 c = lerp(lerp(c1 * _Tint1, c2 * _Tint2, b1), c3 * _Tint3, b2);
 
          #if _SPECGLOSSMAP
          fixed4 g1 = FETCH_TEX1(_SpecGlossMap1, uv1);

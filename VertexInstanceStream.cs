@@ -95,7 +95,7 @@ namespace JBooth.VertexPainterPro
                }
                mr.sharedMaterials = mats;
             }
-            else
+            else if (originalMaterial.Length > 0)
             {
                mr.sharedMaterial = originalMaterial[0];
             }

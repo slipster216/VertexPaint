@@ -3,7 +3,11 @@ Vertex Painter for Unity
 Tested with Unity 5.3.2p2
 
 Example Video:
+
+quick tutorial:
 https://www.youtube.com/watch?v=mtbCtwgI440&feature=youtu.be
+water and refraction:
+https://www.youtube.com/watch?v=V70GQjOH8_Y&feature=youtu.be
 
 Donate: https://pledgie.com/campaigns/31113
 

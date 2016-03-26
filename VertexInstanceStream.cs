@@ -343,6 +343,7 @@ namespace JBooth.VertexPainterPro
          MeshRenderer mr = GetComponent<MeshRenderer>();
          MeshFilter mf = GetComponent<MeshFilter>();
 
+         Debug.Log(mr + " and  " + mf);
          if (mr != null && mf != null)
          {
             Profiler.BeginSample("Creating additionalVertexStream Data");
@@ -360,8 +361,7 @@ namespace JBooth.VertexPainterPro
                }
                stream = new Mesh();
 
-               #if UNITY_EDITOR
-               // even though the docs say you don't need to set the positions on your avs, you do.. in editor only..
+               // even though the docs say you don't need to set the positions on your avs, you do.. 
                stream.vertices = new Vector3[mf.sharedMesh.vertexCount];
 
                // wtf, copy won't work?
@@ -375,6 +375,7 @@ namespace JBooth.VertexPainterPro
                // the editor update call, which only happens occationaly. 
                stream.MarkDynamic();
                stream.triangles = mf.sharedMesh.triangles;
+               #if UNITY_EDITOR
                meshStream = stream;
                #endif
 

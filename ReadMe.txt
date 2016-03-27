@@ -11,6 +11,8 @@ https://www.youtube.com/watch?v=V70GQjOH8_Y&feature=youtu.be
 
 Donate: https://pledgie.com/campaigns/31113
 
+Warning: This package can take a long time to import into Unity due to a large number of shader variants; if you do not need the shaders and only want the vertex painter, I suggest removing them from the project before importing. They are fantastic shaders though..
+
 Additional Vertex Streams
 
 	This package allows you to paint information onto the vertices of a mesh in the Unity editor as well as modify any attribute of the mesh. It uses the new 'additionalVertexStream' system of Unity5, which allows you to override per-instance data on meshes without paying the cost of duplicating a full mesh. This makes it ideal for painting vertex information across many instances of a mesh. The tool also allows you to easily bake that information back to mesh assets if you'd prefer to make a modified mesh and store that in disk, instead of with the instance in the scene. 
@@ -45,7 +47,20 @@ Shaders
 
 Each layer has controls for texture scaling, parallax height, and a contrast which controls the width of the blending area between each layer. 
 
-Finally, the shader allows you to designate one layer of the shader to flow mode. This distorts the texture along directional vectors painted into the third UV set (The first UV set is used for your UV mapping, and Unity uses the second UV set for enlighten data). This is useful to create flowing water, lava, or other effects. The flow layer contains controls for speed and intensity, allowing you to modify the effect globally across the material. The flow layer can optionally use alpha and refraction to distort the layers below it. The normal map will be used as the refraction direction.  
+The shader also allows you to designate one layer of the shader to flow mode. This distorts the texture along directional vectors painted into the third UV set (The first UV set is used for your UV mapping, and Unity uses the second UV set for enlighten data). This is useful to create flowing water, lava, or other effects. The flow layer contains controls for speed and intensity, allowing you to modify the effect globally across the material. The flow layer can optionally use alpha and refraction to distort the layers below it. The normal map will be used as the refraction direction.  
+
+There is also an option for Distance UV blending- this is mostly useful for terrain type features. What this does is generate a scaled set of UVs and blend between two samples based on the distance from the camera. 
 
 The performance of this shader is highly variable based on how many layers you use and which features you enable. Features which are not used in any layers are compiled out; while a feature used on any layer is computed for every layer. In other words, if you don’t use emissive textures on any layer you won’t pay for the feature, but if you use it on one layer an emissive value will be sampled for every layer.
 
+To understand performance characteristics, here is the number of samples taken for various options on a 5 layer shader with a flow map on one layer:
+
+Diffuse Only         = 4 texture samples + 2 flow texture samples
+With Normal Map      = 8 texture samples + 4 flow texture samples
+With Specular Map    = 12 texture samples + 4 flow texture samples
+With Parallax        = 16 texture samples + 4 flow texture samples
+With Distance Blend  = 32 texture samples + 4 flow texture samples
+
+As you can see, the complexity of the shader can grow very fast as features are enabled. 
+
+Because these features are compiled out when not in use, what the shader compiler is actually doing is compiling a shader for each option and picking the correct shader. This means that importing the shaders actually produces many thousands of shader variants, which makes import time very, very long. Before shipping, you may want to use Unity’s ShaderVariantCollection feature to remove the shaders your game does not use; this will make your app much smaller, as it will remove unused variants. 

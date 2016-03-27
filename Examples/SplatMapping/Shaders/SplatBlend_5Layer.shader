@@ -17,7 +17,6 @@ Shader "VertexPainter/SplatBlend_5Layer"
       _Parallax1 ("Parallax Height", Range (0.005, 0.08)) = 0.02
       _TexScale1 ("Texture Scale", Float) = 1
       
-      
       _Tex2("Albedo + Height", 2D) = "white" {}
       _Tint2 ("Tint", Color) = (1, 1, 1, 1)
       [NoScaleOffset][Normal]_Normal2("Normal", 2D) = "bump" {}
@@ -53,7 +52,7 @@ Shader "VertexPainter/SplatBlend_5Layer"
       _Parallax4 ("Parallax Height", Range (0.005, 0.08)) = 0.02 
       _TexScale4 ("Texture Scale", Float) = 1
       _Contrast4("Contrast", Range(0,0.99)) = 0.5 
-      
+
       _Tex5("Albedo + Height", 2D) = "white" {}
       _Tint5 ("Tint", Color) = (1, 1, 1, 1)
       [NoScaleOffset][Normal]_Normal5("Normal", 2D) = "bump" {}
@@ -65,13 +64,20 @@ Shader "VertexPainter/SplatBlend_5Layer"
       _Parallax5 ("Parallax Height", Range (0.005, 0.08)) = 0.02 
       _TexScale5 ("Texture Scale", Float) = 1
       _Contrast5("Contrast", Range(0,0.99)) = 0.5
-      
+
       
       _FlowSpeed ("Flow Speed", Float) = 0
       _FlowIntensity ("Flow Intensity", Float) = 1
       _FlowAlpha ("Flow Alpha", Range(0, 1)) = 1
       _FlowRefraction("Flow Refraction", Range(0, 0.3)) = 0.04
-      
+
+      _DistBlendMin("Distance Blend Begin", Float) = 0
+      _DistBlendMax("Distance Blend Max", Float) = 100
+      _DistUVScale1("Distance UV Scale", Float) = 0.5
+      _DistUVScale2("Distance UV Scale", Float) = 0.5
+      _DistUVScale3("Distance UV Scale", Float) = 0.5
+      _DistUVScale4("Distance UV Scale", Float) = 0.5
+      _DistUVScale5("Distance UV Scale", Float) = 0.5
    }
    SubShader {
       Tags { "RenderType"="Opaque" }
@@ -91,7 +97,7 @@ Shader "VertexPainter/SplatBlend_5Layer"
       #pragma shader_feature __ _FLOW1 _FLOW2 _FLOW3 _FLOW4 _FLOW5
       #pragma shader_feature __ _FLOWDRIFT 
       #pragma shader_feature __ _FLOWREFRACTION
-
+      #pragma shader_feature __ _DISTBLEND
       #include "SplatBlend_Shared.cginc"
       
       void vert (inout appdata_full v, out Input o) 
@@ -101,7 +107,7 @@ Shader "VertexPainter/SplatBlend_5Layer"
       
       void surf (Input IN, inout SurfaceOutputStandard o) 
       {
-         
+         COMPUTEDISTBLEND
          //////////////////
          // Five Layer
          //////////////////
@@ -117,6 +123,12 @@ Shader "VertexPainter/SplatBlend_5Layer"
          fixed4 c3 = FETCH_TEX3(_Tex3, uv3);
          fixed4 c4 = FETCH_TEX4(_Tex4, uv4);
          fixed4 c5 = FETCH_TEX5(_Tex5, uv5);
+         #elif _DISTBLEND
+         fixed4 c1 = lerp(tex2D(_Tex1, uv1), tex2D(_Tex1, uv1*_DistUVScale1), dist);
+         fixed4 c2 = lerp(tex2D(_Tex2, uv2), tex2D(_Tex2, uv2*_DistUVScale2), dist);
+         fixed4 c3 = lerp(tex2D(_Tex3, uv3), tex2D(_Tex3, uv3*_DistUVScale3), dist);
+         fixed4 c4 = lerp(tex2D(_Tex4, uv4), tex2D(_Tex4, uv4*_DistUVScale4), dist);
+         fixed4 c5 = lerp(tex2D(_Tex5, uv5), tex2D(_Tex5, uv5*_DistUVScale5), dist);
          #else
          fixed4 c1 = tex2D(_Tex1, uv1);
          fixed4 c2 = tex2D(_Tex2, uv2);

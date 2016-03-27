@@ -7,7 +7,8 @@ using System.Linq;
 public class SplatMapShaderGUI : ShaderGUI 
 {
 
-   void DrawLayer(MaterialEditor editor, int i, MaterialProperty[] props, string[] keyWords, Workflow workflow, bool hasGloss, bool hasSpec, bool isParallax, bool hasEmis)
+   void DrawLayer(MaterialEditor editor, int i, MaterialProperty[] props, string[] keyWords, Workflow workflow, 
+      bool hasGloss, bool hasSpec, bool isParallax, bool hasEmis, bool hasDistBlend)
    {
       EditorGUIUtility.labelWidth = 0f;
       var albedoMap = FindProperty ("_Tex" + i, props);
@@ -22,6 +23,7 @@ public class SplatMapShaderGUI : ShaderGUI
       var texScale = FindProperty("_TexScale" + i, props);
       var specMap = FindProperty("_SpecGlossMap" + i, props, false);
       var specColor = FindProperty("_SpecColor" + i, props, false);
+      var distUVScale = FindProperty("_DistUVScale" + i, props, false);
 
       editor.TexturePropertySingleLine(new GUIContent("Albedo/Height"), albedoMap);
       editor.ShaderProperty(tint, "Tint");
@@ -48,7 +50,10 @@ public class SplatMapShaderGUI : ShaderGUI
       editor.ShaderProperty(emissionMult, "Emissive Multiplier");
 
       editor.ShaderProperty(texScale, "Texture Scale");
-
+      if (hasDistBlend)
+      {
+         editor.ShaderProperty(distUVScale, "Distance UV Scale");
+      }
       if (isParallax)
       {
          editor.ShaderProperty(parallax, "Parallax Height");
@@ -153,7 +158,7 @@ public class SplatMapShaderGUI : ShaderGUI
       bool hasGloss = (HasTexture(layerCount, targetMat, "_GlossinessTex"));
       bool hasSpec = (HasTexture(layerCount, targetMat, "_SpecGlossMap"));
       bool hasEmis = (HasTexture(layerCount, targetMat, "_Emissive"));
-
+      bool hasDistBlend = keyWords.Contains("_DISTBLEND");
 
       EditorGUI.BeginChangeCheck();
       Workflow oldWorkflow = workflow;
@@ -181,10 +186,31 @@ public class SplatMapShaderGUI : ShaderGUI
 
 
       parallax = EditorGUILayout.Toggle ("Parallax Offset", parallax);
+      hasDistBlend = EditorGUILayout.Toggle("UV Scale in distance", hasDistBlend);
+      var distBlendMin = FindProperty("_DistBlendMin", props);
+      var distBlendMax = FindProperty("_DistBlendMax", props); 
+
+      if (hasDistBlend)
+      {
+         materialEditor.ShaderProperty(distBlendMin, "Distance Blend Min");
+         materialEditor.ShaderProperty(distBlendMax, "Distance Blend Max");
+
+         // make sure max is at least min
+         if (distBlendMin.floatValue > distBlendMax.floatValue)
+         {
+            distBlendMax.floatValue = distBlendMin.floatValue;
+         }
+         // make sure max is at least 1
+         if (distBlendMax.floatValue <= 1)
+         {
+            distBlendMax.floatValue = 1;
+         }
+      }
+
 
       for (int i = 0; i < layerCount; ++i)
       {
-         DrawLayer(materialEditor, i+1, props, keyWords, workflow, hasGloss, hasSpec, parallax, hasEmis);
+         DrawLayer(materialEditor, i+1, props, keyWords, workflow, hasGloss, hasSpec, parallax, hasEmis, hasDistBlend);
 
          EditorGUILayout.Space();
       }
@@ -219,6 +245,10 @@ public class SplatMapShaderGUI : ShaderGUI
          var newKeywords = new List<string>();
 
          newKeywords.Add("_LAYERS" + layerCount.ToString());
+         if (hasDistBlend)
+         {
+            newKeywords.Add("_DISTBLEND");
+         }
          if (parallax) 
          {
             newKeywords.Add("_PARALLAXMAP");

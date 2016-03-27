@@ -34,7 +34,11 @@ Shader "VertexPainter/SplatBlend_2Layer"
       _FlowIntensity ("Flow Intensity", Float) = 1
       _FlowAlpha ("Flow Alpha", Range(0, 1)) = 1
       _FlowRefraction("Flow Refraction", Range(0, 0.3)) = 0.04
-      
+
+      _DistBlendMin("Distance Blend Begin", Float) = 0
+      _DistBlendMax("Distance Blend Max", Float) = 100
+      _DistUVScale1("Distance UV Scale", Float) = 0.5
+      _DistUVScale2("Distance UV Scale", Float) = 0.5
    }
    SubShader {
       Tags { "RenderType"="Opaque" }
@@ -54,6 +58,7 @@ Shader "VertexPainter/SplatBlend_2Layer"
       #pragma shader_feature __ _FLOW1 _FLOW2 
       #pragma shader_feature __ _FLOWDRIFT 
       #pragma shader_feature __ _FLOWREFRACTION
+      #pragma shader_feature __ _DISTBLEND
 
       #include "SplatBlend_Shared.cginc"
       
@@ -64,12 +69,17 @@ Shader "VertexPainter/SplatBlend_2Layer"
       
       void surf (Input IN, inout SurfaceOutputStandard o) 
       {
+         COMPUTEDISTBLEND
+
          float2 uv1 = IN.uv_Tex1 * _TexScale1;
          float2 uv2 = IN.uv_Tex1 * _TexScale2;
          INIT_FLOW
          #if _FLOWDRIFT || !_PARALLAXMAP 
          fixed4 c1 = FETCH_TEX1(_Tex1, uv1);
          fixed4 c2 = FETCH_TEX2(_Tex2, uv2);
+         #elif _DISTBLEND
+         fixed4 c1 = lerp(tex2D(_Tex1, uv1), tex2D(_Tex1, uv1*_DistUVScale1), dist);
+         fixed4 c2 = lerp(tex2D(_Tex2, uv2), tex2D(_Tex2, uv2*_DistUVScale2), dist);
          #else
          fixed4 c1 = tex2D(_Tex1, uv1);
          fixed4 c2 = tex2D(_Tex2, uv2);

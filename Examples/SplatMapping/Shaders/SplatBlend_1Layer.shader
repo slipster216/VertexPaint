@@ -20,6 +20,10 @@ Shader "VertexPainter/SplatBlend_1Layer"
       
       _FlowSpeed ("Flow Speed", Float) = 0
       _FlowIntensity ("Flow Intensity", Float) = 1
+
+      _DistBlendMin("Distance Blend Begin", Float) = 0
+      _DistBlendMax("Distance Blend Max", Float) = 100
+      _DistUVScale1("Distance UV Scale", Float) = 0.5
    }
    SubShader {
       Tags { "RenderType"="Opaque" }
@@ -38,6 +42,7 @@ Shader "VertexPainter/SplatBlend_1Layer"
       // flow map keywords. 
       #pragma shader_feature __ _FLOW1
       #pragma shader_feature __ _FLOWDRIFT 
+      #pragma shader_feature __ _DISTBLEND
 
       #include "SplatBlend_Shared.cginc"
       
@@ -48,10 +53,14 @@ Shader "VertexPainter/SplatBlend_1Layer"
       
       void surf (Input IN, inout SurfaceOutputStandard o) 
       {
+         COMPUTEDISTBLEND
+
          float2 uv1 = IN.uv_Tex1 * _TexScale1;
          INIT_FLOW
          #if (_FLOWDRIFT || !_PARALLAXMAP)
          fixed4 c1 = FETCH_TEX1(_Tex1, uv1);
+         #elif _DISTBLEND
+         fixed4 c1 = lerp(tex2D(_Tex1, uv1), tex2D(_Tex1, uv1*_DistUVScale1), dist);
          #else
          fixed4 c1 = tex2D(_Tex1, uv1);
          #endif

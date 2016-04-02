@@ -77,7 +77,7 @@ namespace JBooth.VertexPainterPro
       }
 
 
-      
+      Vector2 scroll;
       void OnGUI()
       {
          
@@ -100,6 +100,8 @@ namespace JBooth.VertexPainterPro
             }
          }
 
+
+
          DrawChannelGUI();
 
          var ot = tab;
@@ -108,6 +110,7 @@ namespace JBooth.VertexPainterPro
          {
             UpdateDisplayMode();
          }
+         scroll = EditorGUILayout.BeginScrollView(scroll);
          if (tab == Tab.Paint)
          {
             DrawPaintGUI();
@@ -124,6 +127,7 @@ namespace JBooth.VertexPainterPro
          {
             DrawBakeGUI();
          }
+         EditorGUILayout.EndScrollView();
       }
 
       void DrawChannelGUI()

@@ -343,7 +343,6 @@ namespace JBooth.VertexPainterPro
          MeshRenderer mr = GetComponent<MeshRenderer>();
          MeshFilter mf = GetComponent<MeshFilter>();
 
-         Debug.Log(mr + " and  " + mf);
          if (mr != null && mf != null)
          {
             Profiler.BeginSample("Creating additionalVertexStream Data");

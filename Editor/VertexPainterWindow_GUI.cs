@@ -60,6 +60,11 @@ namespace JBooth.VertexPainterPro
       };
 
 
+      static string sSwatchKey = "VertexPainter_Swatches";
+
+      ColorSwatches swatches = null;
+
+
       Tab tab = Tab.Paint;
       
       bool DrawClearButton(string label)
@@ -71,6 +76,8 @@ namespace JBooth.VertexPainterPro
          return false;
       }
 
+
+      
       void OnGUI()
       {
          
@@ -79,6 +86,20 @@ namespace JBooth.VertexPainterPro
             EditorGUILayout.LabelField("No objects selected. Please select an object with a MeshFilter and Renderer");
             return;
          }
+
+         if (swatches == null)
+         {
+            if (EditorPrefs.HasKey(sSwatchKey))
+            {
+               swatches = JsonUtility.FromJson<ColorSwatches>(EditorPrefs.GetString(sSwatchKey));
+            }
+            if (swatches == null)
+            {
+               swatches = ColorSwatches.CreateInstance<ColorSwatches>();
+               EditorPrefs.SetString(sSwatchKey, JsonUtility.ToJson(swatches, false));
+            }
+         }
+
          DrawChannelGUI();
 
          var ot = tab;
@@ -265,6 +286,39 @@ namespace JBooth.VertexPainterPro
          if (brushMode == BrushTarget.Color)
          {
             brushColor = EditorGUILayout.ColorField("Brush Color", brushColor);
+
+            if (GUILayout.Button("Reset Palette", EditorStyles.miniButton, GUILayout.Width(80), GUILayout.Height(16))) 
+            {
+               if (swatches != null)
+               {
+                  DestroyImmediate(swatches);
+               }
+               swatches = ColorSwatches.CreateInstance<ColorSwatches>();
+               EditorPrefs.SetString(sSwatchKey, JsonUtility.ToJson(swatches,false));
+            }
+
+            GUILayout.BeginHorizontal();
+
+            for (int i = 0; i < swatches.colors.Length; ++i) 
+            {
+               if (GUILayout.Button("", EditorStyles.textField, GUILayout.Width(16), GUILayout.Height(16))) 
+               {
+                  brushColor = swatches.colors[i];
+               }
+               EditorGUI.DrawRect(new Rect(GUILayoutUtility.GetLastRect().x + 1, GUILayoutUtility.GetLastRect().y + 1, 14, 14), swatches.colors[i]);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            for (int i = 0; i < swatches.colors.Length; i++) 
+            {
+               if (GUILayout.Button("+", EditorStyles.miniButton, GUILayout.Width(16), GUILayout.Height(12))) 
+               {
+                  swatches.colors[i] = brushColor;
+                  EditorPrefs.SetString(sSwatchKey, JsonUtility.ToJson(swatches, false));
+               }
+            }
+            GUILayout.EndHorizontal();
+
          }
          else if (brushMode == BrushTarget.ValueR || brushMode == BrushTarget.ValueG || brushMode == BrushTarget.ValueB || brushMode == BrushTarget.ValueA)
          {

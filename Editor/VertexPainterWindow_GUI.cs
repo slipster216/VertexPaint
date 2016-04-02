@@ -100,8 +100,6 @@ namespace JBooth.VertexPainterPro
             }
          }
 
-
-
          DrawChannelGUI();
 
          var ot = tab;

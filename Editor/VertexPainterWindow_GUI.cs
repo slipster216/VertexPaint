@@ -89,6 +89,7 @@ namespace JBooth.VertexPainterPro
 
          if (swatches == null)
          {
+            swatches = ColorSwatches.CreateInstance<ColorSwatches>();
             if (EditorPrefs.HasKey(sSwatchKey))
             {
                swatches = JsonUtility.FromJson<ColorSwatches>(EditorPrefs.GetString(sSwatchKey));

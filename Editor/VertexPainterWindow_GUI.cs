@@ -66,6 +66,8 @@ namespace JBooth.VertexPainterPro
 
 
       Tab tab = Tab.Paint;
+
+      bool hideMeshWireframe = false;
       
       bool DrawClearButton(string label)
       {
@@ -129,6 +131,7 @@ namespace JBooth.VertexPainterPro
          EditorGUILayout.EndScrollView();
       }
 
+
       void DrawChannelGUI()
       {
          EditorGUILayout.Separator();
@@ -150,6 +153,16 @@ namespace JBooth.VertexPainterPro
          if (oldShow != showVertexShader)
          {
             UpdateDisplayMode();
+         }
+
+         bool oldHideMeshWireframe = hideMeshWireframe;
+         hideMeshWireframe = GUILayout.Toggle(hideMeshWireframe, "Hide Wireframe");
+         if (hideMeshWireframe != oldHideMeshWireframe)
+         {
+            for (int i = 0; i < jobs.Length; ++i)
+            {
+               EditorUtility.SetSelectedWireframeHidden(jobs[i].renderer, hideMeshWireframe);
+            }
          }
          
          bool hasColors = false;
@@ -453,6 +466,7 @@ namespace JBooth.VertexPainterPro
          {
             aoLightAmbient = EditorGUILayout.ColorField("Light Ambient", aoLightAmbient);
          }
+         aoBakeMode = (AOBakeMode)EditorGUILayout.EnumPopup("Mode", aoBakeMode);
 
 
          EditorGUILayout.BeginHorizontal();

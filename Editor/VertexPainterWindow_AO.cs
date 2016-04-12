@@ -13,7 +13,15 @@ namespace JBooth.VertexPainterPro
       public float   aoIntensity = 2.0f;
       public bool    bakeLighting;
       public Color   aoLightAmbient = new Color(0.05f, 0.05f, 0.05f, 1);
-      
+
+      public enum AOBakeMode
+      {
+         Replace = 0,
+         Multiply
+      }
+      public AOBakeMode aoBakeMode = AOBakeMode.Replace;
+
+
       RaycastHit hit = new RaycastHit();
      
       void ApplyAOLight(ref Color c, Light l, Vector3 pos, Vector3 n)
@@ -94,12 +102,21 @@ namespace JBooth.VertexPainterPro
             floatBrushValue = 1.0f;
             brushColor = Color.white;
             var val = GetBrushValue();
-            var setter = GetSetter(job.stream);
-            for (int i = 0; i < job.verts.Length; ++i)
+            Setter setter = null;
+            Multiplier mult = null;
+
+            if (aoBakeMode == AOBakeMode.Replace)
             {
-               setter.Invoke(i, ref val);
+               setter = GetSetter(job.stream);
+               for (int i = 0; i < job.verts.Length; ++i)
+               {
+                  setter.Invoke(i, ref val);
+               }
             }
-       
+            else
+            {
+               mult = GetMultiplier(job.stream);
+            }
 
             for (int i = 0; i<verts.Length; i++) 
             {
@@ -133,7 +150,6 @@ namespace JBooth.VertexPainterPro
                      if ( hit.distance > aoRange.x ) 
                      {
                         totalOcclusion += Mathf.Clamp01( 1 - ( hit.distance / aoRange.y ) );
-                        
                      }
                   }
 
@@ -175,8 +191,14 @@ namespace JBooth.VertexPainterPro
                   brushValue = (int)(totalOcclusion * 255);
                }
                val = GetBrushValue();
-               setter.Invoke(i, ref val);
-               
+               if (aoBakeMode == AOBakeMode.Replace)
+               {
+                  setter.Invoke(i, ref val);
+               }
+               else
+               {
+                  mult.Invoke(i, ref val);
+               }
             }
             job.stream.Apply();
             DestroyImmediate(mesh);

@@ -149,14 +149,14 @@ namespace JBooth.VertexPainterPro
             InitMeshes();
          }
          var oldShow = showVertexShader;
-         showVertexShader = GUILayout.Toggle(showVertexShader, "Show Vertex Data");
+         showVertexShader = GUILayout.Toggle(showVertexShader, "Show Vertex Data (ctrl-V)");
          if (oldShow != showVertexShader)
          {
             UpdateDisplayMode();
          }
 
          bool oldHideMeshWireframe = hideMeshWireframe;
-         hideMeshWireframe = GUILayout.Toggle(hideMeshWireframe, "Hide Wireframe");
+         hideMeshWireframe = GUILayout.Toggle(hideMeshWireframe, "Hide Wireframe (ctrl-W)");
          if (hideMeshWireframe != oldHideMeshWireframe)
          {
             for (int i = 0; i < jobs.Length; ++i)

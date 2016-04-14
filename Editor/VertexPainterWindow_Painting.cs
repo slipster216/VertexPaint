@@ -835,6 +835,7 @@ namespace JBooth.VertexPainterPro
       }
 
       public bool            enabled;
+      public Vector3         oldpos = Vector3.zero;
       public float           brushSize = 1;
       public float           brushFlow = 8;
       public float           brushFalloff = 1; // linear
@@ -1735,11 +1736,26 @@ namespace JBooth.VertexPainterPro
 
             if (RXLookingGlass.IntersectRayMesh(ray, msh, mtx, out hit))
             {
-               if (hit.distance < distance)
+               if (Event.current.shift == false) 
                {
-                  distance = hit.distance;
-                  point = hit.point;
-                  normal = hit.normal;
+                  if (hit.distance < distance) 
+                  {
+                     distance = hit.distance;
+                     point = hit.point;
+                     oldpos = hit.point;
+                     normal = hit.normal;
+                  }
+               } 
+               else 
+               {
+                  point = oldpos;
+               }
+            } 
+            else 
+            {
+               if (Event.current.shift == true) 
+               {
+                  point = oldpos;
                }
             }  
          }
@@ -1769,6 +1785,31 @@ namespace JBooth.VertexPainterPro
             }
 
          }
+            
+         if (Event.current.type == EventType.KeyUp && Event.current.control)
+         {
+            if (Event.current.keyCode == KeyCode.W)
+            {
+               hideMeshWireframe = !hideMeshWireframe;
+               for (int i = 0; i < jobs.Length; ++i)
+               {
+                  EditorUtility.SetSelectedWireframeHidden(jobs[i].renderer, hideMeshWireframe);
+               }
+            }
+            if (Event.current.keyCode == KeyCode.V)
+            {
+               showVertexShader = !showVertexShader;
+               UpdateDisplayMode();
+            }
+         }
+
+
+
+         if (Event.current.type == EventType.MouseMove && Event.current.shift) {
+            brushSize += Event.current.delta.x * (float)deltaTime * (float)6;
+            brushFalloff -= Event.current.delta.y * (float)deltaTime * (float)48;
+         }
+         /*Player7 End*/
 
          if (Event.current.rawType == EventType.MouseUp)
          {

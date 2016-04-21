@@ -276,7 +276,7 @@ namespace JBooth.VertexPainterPro
 
       void DrawBrushSettingsGUI()
       {
-         brushSize      = EditorGUILayout.Slider("Brush Size", brushSize, 0.01f, 10.0f);
+         brushSize      = EditorGUILayout.Slider("Brush Size", brushSize, 0.01f, 30.0f);
          brushFlow      = EditorGUILayout.Slider("Brush Flow", brushFlow, 0.1f, 128.0f);
          brushFalloff   = EditorGUILayout.Slider("Brush Falloff", brushFalloff, 0.1f, 4.0f);
          if (tab == Tab.Paint && flowTarget != FlowTarget.ColorBA && flowTarget != FlowTarget.ColorRG)

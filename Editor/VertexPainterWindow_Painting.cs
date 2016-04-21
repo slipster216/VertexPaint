@@ -1340,7 +1340,7 @@ namespace JBooth.VertexPainterPro
          point = j.renderer.transform.worldToLocalMatrix.MultiplyPoint3x4(point);
          // for some reason this doesn't handle scale, seems like it should
          // we handle it poorly until I can find a better solution
-         float scale = 1.0f / j.renderer.transform.lossyScale.x;
+         float scale = 1.0f / Mathf.Abs(j.renderer.transform.lossyScale.x);
 
          float bz = scale * brushSize;
          var lerper = GetLerper(j.stream);
@@ -1369,7 +1369,15 @@ namespace JBooth.VertexPainterPro
                   {
                      t = j.stream.tangents[i];
                   }
-                  
+
+                  var mtx = j.meshFilter.transform.localToWorldMatrix;
+                  n = mtx.MultiplyVector(n);
+                  Vector3 tg = new Vector3(t.x, t.y, t.z);
+                  tg = mtx.MultiplyVector(tg);
+                  t.x = tg.x;
+                  t.y = tg.y;
+                  t.z = tg.z;
+
                   target.x = 0.5f;
                   target.y = 0.5f;
                   if (flowBrushType == FlowBrushType.Direction)

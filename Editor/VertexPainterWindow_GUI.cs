@@ -155,8 +155,11 @@ namespace JBooth.VertexPainterPro
             UpdateDisplayMode();
          }
 
+         showVertexPoints = GUILayout.Toggle(showVertexPoints, "Show Brush Influence");
+
          bool oldHideMeshWireframe = hideMeshWireframe;
-         hideMeshWireframe = GUILayout.Toggle(hideMeshWireframe, "Hide Wireframe (ctrl-W)");
+         hideMeshWireframe = !GUILayout.Toggle(!hideMeshWireframe, "Show Wireframe (ctrl-W)");
+
          if (hideMeshWireframe != oldHideMeshWireframe)
          {
             for (int i = 0; i < jobs.Length; ++i)

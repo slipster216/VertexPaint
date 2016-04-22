@@ -852,6 +852,7 @@ namespace JBooth.VertexPainterPro
       public bool            pull = false;
       public VertexContraint vertexContraint = VertexContraint.Normal;
       public bool            showVertexShader = false;
+      public bool            showVertexPoints = false;
       public PaintJob[]      jobs = new PaintJob[0];
 
 
@@ -1332,6 +1333,33 @@ namespace JBooth.VertexPainterPro
 
       }
 
+
+      void DrawVertexPoints(PaintJob j, Vector3 point)
+      {
+         Profiler.BeginSample("Draw Vertex Points");
+         PrepBrushMode(j);
+         // convert point into local space, so we don't have to convert every point
+         point = j.renderer.transform.worldToLocalMatrix.MultiplyPoint3x4(point);
+         // for some reason this doesn't handle scale, seems like it should
+         // we handle it poorly until I can find a better solution
+         float scale = 1.0f / Mathf.Abs(j.renderer.transform.lossyScale.x);
+
+         float bz = scale * brushSize;
+
+         for (int i = 0; i < j.verts.Length; ++i)
+         {
+            float d = Vector3.Distance(point, j.verts[i]);
+            if (d < bz)
+            {
+               Handles.color = Color.white;
+               Vector3 wp = j.meshFilter.transform.localToWorldMatrix.MultiplyPoint(j.verts[i]);
+               Handles.SphereCap(0, wp, Quaternion.identity, HandleUtility.GetHandleSize(wp) * 0.02f);
+            }
+         }
+         Profiler.EndSample();
+      }
+
+
       void PaintMesh(PaintJob j, Vector3 point)
       {
          Profiler.BeginSample("Paint Mesh");
@@ -1391,17 +1419,6 @@ namespace JBooth.VertexPainterPro
                      target = new Vector2(dx, dy);
                      target.Normalize();
 
-                     /* using matrix; more code for same result. 
-                     Matrix4x4 tbn = new Matrix4x4();
-                     tbn.SetRow(0, t);
-                     tbn.SetRow(1, new Vector4(b.x, b.y, b.z, 0));
-                     tbn.SetRow(2, new Vector4(n.x, n.y, n.z, 0));
-                     tbn.SetRow(3, new Vector4(0,0,0,1));
-
-                     Vector3 res = tbn.MultiplyVector(sd);
-                     target.x = res.x;
-                     target.y = res.y;
-                     */
                      if (flowTarget == FlowTarget.ColorBA || flowTarget == FlowTarget.ColorRG || flowRemap01)
                      {
                         target.x = target.x * 0.5f + 0.5f;
@@ -1454,7 +1471,6 @@ namespace JBooth.VertexPainterPro
             }
             Profiler.EndSample();
          }
-         
 
          j.stream.Apply();
          Profiler.EndSample();
@@ -1817,7 +1833,6 @@ namespace JBooth.VertexPainterPro
             brushSize += Event.current.delta.x * (float)deltaTime * (float)6;
             brushFalloff -= Event.current.delta.y * (float)deltaTime * (float)48;
          }
-         /*Player7 End*/
 
          if (Event.current.rawType == EventType.MouseUp)
          {
@@ -1882,6 +1897,14 @@ namespace JBooth.VertexPainterPro
                PaintMesh(jobs[i], point);
                Undo.RecordObject(jobs[i].stream, "Vertex Painter Stroke");
 
+            }
+         }
+
+         if (jobs.Length > 0 && showVertexPoints)
+         {
+            for (int i = 0; i < jobs.Length; ++i)
+            {
+               DrawVertexPoints(jobs[i], point);
             }
          }
 

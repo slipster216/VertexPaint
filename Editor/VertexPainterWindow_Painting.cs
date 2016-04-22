@@ -853,8 +853,14 @@ namespace JBooth.VertexPainterPro
       public VertexContraint vertexContraint = VertexContraint.Normal;
       public bool            showVertexShader = false;
       public bool            showVertexPoints = false;
-      public PaintJob[]      jobs = new PaintJob[0];
 
+      public enum BrushVisualization
+      {
+         Sphere,
+         Disk
+      }
+      public BrushVisualization brushVisualization = BrushVisualization.Sphere;
+      public PaintJob[]      jobs = new PaintJob[0];
 
 
       public class PaintJob
@@ -1768,6 +1774,14 @@ namespace JBooth.VertexPainterPro
                      point = hit.point;
                      oldpos = hit.point;
                      normal = hit.normal;
+                     // if we don't have normal overrides, we have to recast against the shared mesh to get it's normal
+                     // This could get a little strange if you modify the mesh, then delete the normal data, but in that
+                     // case there's no real correct answer anyway without knowing the index of the vertex we're hitting.
+                     if (normal.magnitude < 0.1f)
+                     {
+                        RXLookingGlass.IntersectRayMesh(ray, jobs[i].meshFilter.sharedMesh, mtx, out hit);
+                        normal = hit.normal;
+                     }
                   }
                } 
                else 
@@ -1848,8 +1862,8 @@ namespace JBooth.VertexPainterPro
          {
             Handles.color = new Color(brushColor.r, brushColor.g, brushColor.b, 0.4f);
          }
-         else if (brushMode == BrushTarget.ValueR || brushMode == BrushTarget.ValueG || 
-            brushMode == BrushTarget.ValueB || brushMode == BrushTarget.ValueA)
+         else if (brushMode == BrushTarget.ValueR || brushMode == BrushTarget.ValueG ||
+                  brushMode == BrushTarget.ValueB || brushMode == BrushTarget.ValueA)
          {
             float v = (float)brushValue / 255.0f;
             Handles.color = new Color(v, v, v, 0.4f);
@@ -1860,7 +1874,7 @@ namespace JBooth.VertexPainterPro
             Handles.color = new Color(v, v, v, 0.4f);
          }
 
-         if (tab != Tab.Deform)
+         if (brushVisualization == BrushVisualization.Sphere)
          {
             Handles.SphereCap(0, point, Quaternion.identity, brushSize * 2);
          }
@@ -1868,9 +1882,9 @@ namespace JBooth.VertexPainterPro
          {
             Handles.color = new Color(0.8f, 0, 0, 1.0f);
             float r = Mathf.Pow(0.5f, brushFalloff);
-            Handles.DrawWireDisc(point, normal, brushSize * 2 * r);
+            Handles.DrawWireDisc(point, normal, brushSize * r);
             Handles.color = new Color(0.9f, 0, 0, 0.8f);
-            Handles.DrawWireDisc(point, normal, brushSize * 2);
+            Handles.DrawWireDisc(point, normal, brushSize);
          }
          // eat current event if mouse event and we're painting
          if (Event.current.isMouse && painting)

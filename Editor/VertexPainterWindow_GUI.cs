@@ -155,6 +155,8 @@ namespace JBooth.VertexPainterPro
             UpdateDisplayMode();
          }
 
+         brushVisualization = (BrushVisualization)EditorGUILayout.EnumPopup("Brush Visualization", brushVisualization);
+
          showVertexPoints = GUILayout.Toggle(showVertexPoints, "Show Brush Influence");
 
          bool oldHideMeshWireframe = hideMeshWireframe;
@@ -167,6 +169,7 @@ namespace JBooth.VertexPainterPro
                EditorUtility.SetSelectedWireframeHidden(jobs[i].renderer, hideMeshWireframe);
             }
          }
+
          
          bool hasColors = false;
          bool hasUV0 = false;

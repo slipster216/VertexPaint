@@ -132,7 +132,7 @@ Shader "VertexPainter/SplatBlendSpecular_2Layer"
          
          #if _NORMALMAP
          half4 n1 = FETCH_TEX1 (_Normal1, uv1);
-         half4 n2 = FETCH_TEX1 (_Normal2, uv2);
+         half4 n2 = FETCH_TEX2 (_Normal2, uv2);
          o.Normal = UnpackNormal(lerp(n1, n2, b1));
          #endif
          o.Albedo = c.rgb;

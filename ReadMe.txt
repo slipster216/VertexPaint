@@ -29,7 +29,7 @@ Interface
 
 
 Paint
-	This tool allows you to paint information directly onto the vertices Color or UV channels. Data can be viewed as either color information or greyscale information if you are working on individual channels.
+	This tool allows you to paint information directly onto the vertices Color or UV channels. Data can be viewed as either color information or greyscale information if you are working on individual channels. You can even extend the system with custom brushes that you define for your project, so if you want to paint onto the color and UV channels in one stroke, you can! This is really useful if you want to pack various sub-material values into vertices to save on sampler ops. 
 
 Deform
 	This tool allows you to modify the vertices positions, properly recalculating normals and tangents. 

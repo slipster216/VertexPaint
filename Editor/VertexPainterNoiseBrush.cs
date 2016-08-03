@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEditor;
 
+
 // This is an example of how to create a custom brush for the vertex painting system. The use case driving this
 // feature was needing to paint into more channels than just RGBA at once, but you can create fairly arbitrary
 // brushes with it, that can affect as many channels as you want in any way you want. The example here is
@@ -16,7 +17,7 @@ namespace JBooth.VertexPainterPro
 {
    // Allow the user to create brush objects as assets in an editor folder
    [CreateAssetMenu(menuName = "Create/Vertex Painter Brush/Noise Brush", fileName="noise_brush")]
-   public class NoiseBrush : VertexPainterCustomBrush 
+   public class VertexPainterNoiseBrush : VertexPainterCustomBrush 
    {
       // I like a little object to hold the brush settings..
       [System.Serializable]

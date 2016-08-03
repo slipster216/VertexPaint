@@ -119,16 +119,14 @@ namespace JBooth.VertexPainterPro
       {
          if (enforcedColorChannels == true)
             return;
-         enforcedColorChannels = false;
+         enforcedColorChannels = true;
          MeshFilter mf = GetComponent<MeshFilter>();
          Color[] origColors = mf.sharedMesh.colors;
          if (stream != null && stream.colors.Length > 0 && (origColors == null || origColors.Length == 0))
          {
-            Profiler.BeginSample("Set mesh colors");
             // workaround for unity bug; dispite docs claim, color channels must exist on the original mesh
             // for the additionalVertexStream to work. Which is, sad...
             mf.sharedMesh.colors = stream.colors;
-            Profiler.EndSample();
          }
       }
 
@@ -345,7 +343,6 @@ namespace JBooth.VertexPainterPro
 
          if (mr != null && mf != null)
          {
-            Profiler.BeginSample("Creating additionalVertexStream Data");
             int vertexCount = mf.sharedMesh.vertexCount;
             Mesh stream = null;
    #if UNITY_EDITOR
@@ -353,7 +350,6 @@ namespace JBooth.VertexPainterPro
    #endif
             if (stream == null || vertexCount != stream.vertexCount)
             {
-               Profiler.BeginSample("Create Mesh stream");
                if (stream != null)
                {
                   DestroyImmediate(stream);
@@ -379,10 +375,7 @@ namespace JBooth.VertexPainterPro
                #endif
 
                stream.hideFlags = HideFlags.HideAndDontSave;
-               Profiler.EndSample();
             }
-
-            Profiler.BeginSample("Generating Mesh");
 
             if (_positions != null && _positions.Length == vertexCount) { stream.vertices = _positions; }
             if (_normals != null && _normals.Length == vertexCount) { stream.normals = _normals; } else { stream.normals = null; }
@@ -396,10 +389,6 @@ namespace JBooth.VertexPainterPro
 
             EnforceOriginalMeshHasColors(stream);
 
-            Profiler.EndSample();
-
-            Profiler.BeginSample("Uploading mesh data");
-
             if (!Application.isPlaying || Application.isEditor)
             {
                // only mark no longer readable in game..
@@ -409,9 +398,6 @@ namespace JBooth.VertexPainterPro
             stream.UploadMeshData(markNoLongerReadable);
             mr.additionalVertexStreams = stream;
 
-            Profiler.EndSample(); // uploading mesh data
-
-            Profiler.EndSample(); // creating additional vertex stream data
             return stream;
          }
          return null;

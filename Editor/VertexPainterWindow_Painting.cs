@@ -17,271 +17,352 @@ namespace JBooth.VertexPainterPro
 
       // whats worse- this could also be condensed down to a macro, which would actually be MORE
       // safe in terms of potential bugs than all this; and it would be like a dozen lines to boot.
-      delegate void Setter(int idx, ref object x);
 
-      Setter GetSetter(VertexInstanceStream s)
+
+
+      public delegate void Lerper(PaintJob j, int idx, ref object v, float strength);
+
+      static void FlowColorRG(PaintJob j, int idx, ref object v, float r)
       {
+         Vector2 vv = (Vector2)v;
+         var s = j.stream;
+         Color c = s.colors[idx];
+         s.colors[idx].r = Mathf.Lerp(c.r, vv.x, r);
+         s.colors[idx].g = Mathf.Lerp(c.g, vv.y, r); 
+      }
+      static void FlowColorBA(PaintJob j, int idx, ref object v, float r)
+      {
+         Vector2 vv = (Vector2)v;
+         var s = j.stream;
+         Color c = s.colors[idx];
+         s.colors[idx].b = Mathf.Lerp(c.b, vv.x, r);
+         s.colors[idx].a = Mathf.Lerp(c.a, vv.y, r); 
+      }
+      static void FlowUV0_XY(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 o = s.uv0[idx];
+         Vector2 t = (Vector2)v;
+         o.x = Mathf.Lerp(o.x, t.x, r);
+         o.y = Mathf.Lerp(o.y, t.y, r);
+         s.uv0[idx] = o;
+      }
+      static void FlowUV0_ZW(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 o = s.uv0[idx];
+         Vector2 t = (Vector2)v;
+         o.z = Mathf.Lerp(o.z, t.x, r);
+         o.w = Mathf.Lerp(o.w, t.y, r);
+         s.uv0[idx] = o;
+      }
+      static void FlowUV1_XY(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 o = s.uv1[idx];
+         Vector2 t = (Vector2)v;
+         o.x = Mathf.Lerp(o.x, t.x, r);
+         o.y = Mathf.Lerp(o.y, t.y, r);
+         s.uv1[idx] = o;
+      }
+      static void FlowUV1_ZW(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 o = s.uv1[idx];
+         Vector2 t = (Vector2)v;
+         o.z = Mathf.Lerp(o.z, t.x, r);
+         o.w = Mathf.Lerp(o.w, t.y, r);
+         s.uv1[idx] = o;
+      }
+      static void FlowUV2_XY(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 o = s.uv2[idx];
+         Vector2 t = (Vector2)v;
+         o.x = Mathf.Lerp(o.x, t.x, r);
+         o.y = Mathf.Lerp(o.y, t.y, r);
+         s.uv2[idx] = o;
+      }
+      static void FlowUV2_ZW(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 o = s.uv2[idx];
+         Vector2 t = (Vector2)v;
+         o.z = Mathf.Lerp(o.z, t.x, r);
+         o.w = Mathf.Lerp(o.w, t.y, r);
+         s.uv2[idx] = o;
+      }
+      static void FlowUV3_XY(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 o = s.uv3[idx];
+         Vector2 t = (Vector2)v;
+         o.x = Mathf.Lerp(o.x, t.x, r);
+         o.y = Mathf.Lerp(o.y, t.y, r);
+         s.uv3[idx] = o;
+      }
+      static void FlowUV3_ZW(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 o = s.uv3[idx];
+         Vector2 t = (Vector2)v;
+         o.z = Mathf.Lerp(o.z, t.x, r);
+         o.w = Mathf.Lerp(o.w, t.y, r);
+         s.uv3[idx] = o;
+      }
+      static void ColorRGBA(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         s.colors[idx] = Color.Lerp(s.colors[idx], (Color)v, r);
+      }
+      static void ColorR(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         s.colors[idx].r = Mathf.Lerp(s.colors[idx].r, (float)v, r);
+      }
+      static void ColorG(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         s.colors[idx].g = Mathf.Lerp(s.colors[idx].g, (float)v, r);
+      }
+      static void ColorB(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         s.colors[idx].b = Mathf.Lerp(s.colors[idx].b, (float)v, r);
+      }
+      static void ColorA(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         s.colors[idx].a = Mathf.Lerp(s.colors[idx].a, (float)v, r);
+      }
+      static void UV0_X(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv0[idx];
+         vec.x = Mathf.Lerp(vec.x, (float)v, r);
+         s.uv0[idx] = vec;
+      }
+      static void UV0_Y(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv0[idx];
+         vec.y = Mathf.Lerp(vec.y, (float)v, r);
+         s.uv0[idx] = vec;
+      }
+      static void UV0_Z(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv0[idx];
+         vec.z = Mathf.Lerp(vec.z, (float)v, r);
+         s.uv0[idx] = vec;
+      }
+      static void UV0_W(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv0[idx];
+         vec.w = Mathf.Lerp(vec.w, (float)v, r);
+         s.uv0[idx] = vec;
+      }
+      static void UV1_X(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv1[idx];
+         vec.x = Mathf.Lerp(vec.x, (float)v, r);
+         s.uv1[idx] = vec;
+      }
+      static void UV1_Y(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv1[idx];
+         vec.y = Mathf.Lerp(vec.y, (float)v, r);
+         s.uv1[idx] = vec;
+      }
+      static void UV1_Z(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv1[idx];
+         vec.z = Mathf.Lerp(vec.z, (float)v, r);
+         s.uv1[idx] = vec;
+      }
+      static void UV1_W(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv1[idx];
+         vec.w = Mathf.Lerp(vec.w, (float)v, r);
+         s.uv1[idx] = vec;
+      }
+      static void UV2_X(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv2[idx];
+         vec.x = Mathf.Lerp(vec.x, (float)v, r);
+         s.uv2[idx] = vec;
+      }
+      static void UV2_Y(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv2[idx];
+         vec.y = Mathf.Lerp(vec.y, (float)v, r);
+         s.uv2[idx] = vec;
+      }
+      static void UV2_Z(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv2[idx];
+         vec.z = Mathf.Lerp(vec.z, (float)v, r);
+         s.uv2[idx] = vec;
+      }
+      static void UV2_W(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv2[idx];
+         vec.w = Mathf.Lerp(vec.w, (float)v, r);
+         s.uv2[idx] = vec;
+      }
+      static void UV3_X(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv3[idx];
+         vec.x = Mathf.Lerp(vec.x, (float)v, r);
+         s.uv3[idx] = vec;
+      }
+      static void UV3_Y(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv3[idx];
+         vec.y = Mathf.Lerp(vec.y, (float)v, r);
+         s.uv3[idx] = vec;
+      }
+      static void UV3_Z(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv3[idx];
+         vec.z = Mathf.Lerp(vec.z, (float)v, r);
+         s.uv3[idx] = vec;
+      }
+      static void UV3_W(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         Vector4 vec = s.uv3[idx];
+         vec.w = Mathf.Lerp(vec.w, (float)v, r);
+         s.uv3[idx] = vec;
+      }
+
+      // I really wish I could Lerper[] and just return FlowLerpers[(int)flowTarget]..
+      Lerper GetLerper()
+      {
+         if (tab == Tab.Custom)
+         {
+            if (customBrush != null)
+            {
+               return customBrush.GetLerper();
+            }
+            else
+            {
+               Debug.LogError("No Custom Brush selected");
+               return null;
+            }
+         }
          if (tab == Tab.Flow)
          {
             switch (flowTarget)
             {
                case FlowTarget.ColorRG:
-                  return delegate(int idx, ref object v)
-                  {
-                     Vector2 vv = (Vector2)v;
-                     s.colors[idx].r = vv.x;
-                     s.colors[idx].g = vv.y;
-                  }; 
+                  return FlowColorRG;
                case FlowTarget.ColorBA:
-                  return delegate(int idx, ref object v)
-                  {
-                     Vector2 vv = (Vector2)v;
-                     s.colors[idx].b = vv.x;
-                     s.colors[idx].a = vv.y;
-                  }; 
+                  return FlowColorBA;
                case FlowTarget.UV0_XY:
-                  return delegate(int idx, ref object v)
-                  {
-                     Vector4 vec = s.uv0[idx];
-                     Vector2 iv = (Vector2)v;
-                     vec.x = iv.x;
-                     vec.y = iv.y;
-                     s.uv0[idx] = vec;
-                  }; 
+                  return FlowUV0_XY;
                case FlowTarget.UV0_ZW:
-                  return delegate(int idx, ref object v)
-                  {
-                     Vector4 vec = s.uv0[idx];
-                     Vector2 iv = (Vector2)v;
-                     vec.z = iv.x;
-                     vec.w = iv.y;
-                     s.uv0[idx] = vec;
-                  }; 
+                  return FlowUV0_ZW;
                case FlowTarget.UV1_XY:
-                  return delegate(int idx, ref object v)
-                  {
-                     Vector4 vec = s.uv1[idx];
-                     Vector2 iv = (Vector2)v;
-                     vec.x = iv.x;
-                     vec.y = iv.y;
-                     s.uv1[idx] = vec;
-                  }; 
+                  return FlowUV1_XY;
                case FlowTarget.UV1_ZW:
-                  return delegate(int idx, ref object v)
-                  {
-                     Vector4 vec = s.uv1[idx];
-                     Vector2 iv = (Vector2)v;
-                     vec.z = iv.x;
-                     vec.w = iv.y;
-                     s.uv1[idx] = vec;
-                  }; 
+                  return FlowUV1_ZW;
                case FlowTarget.UV2_XY:
-                  return delegate(int idx, ref object v)
-                  {
-                     Vector4 vec = s.uv2[idx];
-                     Vector2 iv = (Vector2)v;
-                     vec.x = iv.x;
-                     vec.y = iv.y;
-                     s.uv2[idx] = vec;
-                  }; 
+                  return FlowUV2_XY;
                case FlowTarget.UV2_ZW:
-                  return delegate(int idx, ref object v)
-                  {
-                     Vector4 vec = s.uv2[idx];
-                     Vector2 iv = (Vector2)v;
-                     vec.z = iv.x;
-                     vec.w = iv.y;
-                     s.uv2[idx] = vec;
-                  }; 
+                  return FlowUV2_ZW;
                case FlowTarget.UV3_XY:
-                  return delegate(int idx, ref object v)
-                  {
-                     Vector4 vec = s.uv3[idx];
-                     Vector2 iv = (Vector2)v;
-                     vec.x = iv.x;
-                     vec.y = iv.y;
-                     s.uv3[idx] = vec;
-                  }; 
+                  return FlowUV3_XY;
                case FlowTarget.UV3_ZW:
-                  return delegate(int idx, ref object v)
-                  {
-                     Vector4 vec = s.uv3[idx];
-                     Vector2 iv = (Vector2)v;
-                     vec.z = iv.x;
-                     vec.w = iv.y;
-                     s.uv3[idx] = vec;
-                  }; 
+                  return FlowUV3_ZW;
             }
             return null;
          }
          switch (brushMode)
          {
             case BrushTarget.Color:
-               return delegate(int idx, ref object v)
-               {
-                  s.colors[idx] = (Color)v;
-               };     
+               return ColorRGBA;   
             case BrushTarget.ValueR:
-               return delegate(int idx, ref object v)
-               {
-                  s.colors[idx].r = (float)v;
-               };
+               return ColorR;
             case BrushTarget.ValueG:
-               return delegate(int idx, ref object v)
-               {
-                  s.colors[idx].g = (float)v;
-               };
+               return ColorR;
             case BrushTarget.ValueB:
-               return delegate(int idx, ref object v)
-               {
-                  s.colors[idx].b = (float)v;
-               };
+               return ColorB;
             case BrushTarget.ValueA:
-               return delegate(int idx, ref object v)
-               {
-                  s.colors[idx].a = (float)v;
-               }; 
+               return ColorA;
             case BrushTarget.UV0_X:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv0[idx];
-                  vec.x = (float)v;
-                  s.uv0[idx] = vec;
-               }; 
+               return UV0_X;
             case BrushTarget.UV0_Y:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv0[idx];
-                  vec.y = (float)v;
-                  s.uv0[idx] = vec;
-               }; 
+               return UV0_Y;
             case BrushTarget.UV0_Z:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv0[idx];
-                  vec.z = (float)v;
-                  s.uv0[idx] = vec;
-               }; 
+               return UV0_Z;
             case BrushTarget.UV0_W:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv0[idx];
-                  vec.w = (float)v;
-                  s.uv0[idx] = vec;
-               }; 
+               return UV0_W;
             case BrushTarget.UV1_X:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv1[idx];
-                  vec.x = (float)v;
-                  s.uv1[idx] = vec;
-               }; 
+               return UV1_X;
             case BrushTarget.UV1_Y:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv1[idx];
-                  vec.y = (float)v;
-                  s.uv1[idx] = vec;
-               }; 
+               return UV1_Y;
             case BrushTarget.UV1_Z:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv1[idx];
-                  vec.z = (float)v;
-                  s.uv1[idx] = vec;
-               }; 
+               return UV1_Z;
             case BrushTarget.UV1_W:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv1[idx];
-                  vec.w = (float)v;
-                  s.uv1[idx] = vec;
-               }; 
+               return UV1_W;
             case BrushTarget.UV2_X:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv2[idx];
-                  vec.x = (float)v;
-                  s.uv2[idx] = vec;
-               }; 
+               return UV2_X;
             case BrushTarget.UV2_Y:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv2[idx];
-                  vec.y = (float)v;
-                  s.uv2[idx] = vec;
-               }; 
+               return UV2_Y;
             case BrushTarget.UV2_Z:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv2[idx];
-                  vec.z = (float)v;
-                  s.uv2[idx] = vec;
-               }; 
+               return UV2_Z;
             case BrushTarget.UV2_W:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv2[idx];
-                  vec.w = (float)v;
-                  s.uv2[idx] = vec;
-               }; 
+               return UV2_W;
             case BrushTarget.UV3_X:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv3[idx];
-                  vec.x = (float)v;
-                  s.uv3[idx] = vec;
-               }; 
+               return UV3_X;
             case BrushTarget.UV3_Y:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv3[idx];
-                  vec.y = (float)v;
-                  s.uv3[idx] = vec;
-               };
+               return UV3_Y;
             case BrushTarget.UV3_Z:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv3[idx];
-                  vec.z = (float)v;
-                  s.uv3[idx] = vec;
-               }; 
+               return UV3_Z;
             case BrushTarget.UV3_W:
-               return delegate(int idx, ref object v)
-               {
-                  Vector4 vec = s.uv3[idx];
-                  vec.w = (float)v;
-                  s.uv3[idx] = vec;
-               }; 
+               return UV3_W;
                
          }
          return null;
       }
 
-      delegate void Multiplier(int idx, ref object x);
-
-      Multiplier GetMultiplier(VertexInstanceStream s)
+      // only really used for AO, seems like a bit overkill, but it makes things easier..
+      public delegate void Multiplier(VertexInstanceStream s, int idx, ref object x);
+      Multiplier GetMultiplier()
       {
          if (tab == Tab.Flow)
          {
             switch (flowTarget)
             {
                case FlowTarget.ColorRG:
-                  return delegate(int idx, ref object v)
+                  return delegate(VertexInstanceStream s, int idx, ref object v)
                   {
                      Vector2 vv = (Vector2)v;
                      s.colors[idx].r *= vv.x;
                      s.colors[idx].g *= vv.y;
                   }; 
                case FlowTarget.ColorBA:
-                  return delegate(int idx, ref object v)
+                  return delegate(VertexInstanceStream s, int idx, ref object v)
                   {
                      Vector2 vv = (Vector2)v;
                      s.colors[idx].b *= vv.x;
                      s.colors[idx].a *= vv.y;
                   }; 
                case FlowTarget.UV0_XY:
-                  return delegate(int idx, ref object v)
+                  return delegate(VertexInstanceStream s, int idx, ref object v)
                   {
                      Vector4 vec = s.uv0[idx];
                      Vector2 iv = (Vector2)v;
@@ -290,7 +371,7 @@ namespace JBooth.VertexPainterPro
                      s.uv0[idx] = vec;
                   }; 
                case FlowTarget.UV0_ZW:
-                  return delegate(int idx, ref object v)
+                  return delegate(VertexInstanceStream s, int idx, ref object v)
                   {
                      Vector4 vec = s.uv0[idx];
                      Vector2 iv = (Vector2)v;
@@ -299,7 +380,7 @@ namespace JBooth.VertexPainterPro
                      s.uv0[idx] = vec;
                   }; 
                case FlowTarget.UV1_XY:
-                  return delegate(int idx, ref object v)
+                  return delegate(VertexInstanceStream s, int idx, ref object v)
                   {
                      Vector4 vec = s.uv1[idx];
                      Vector2 iv = (Vector2)v;
@@ -308,7 +389,7 @@ namespace JBooth.VertexPainterPro
                      s.uv1[idx] = vec;
                   }; 
                case FlowTarget.UV1_ZW:
-                  return delegate(int idx, ref object v)
+                  return delegate(VertexInstanceStream s, int idx, ref object v)
                   {
                      Vector4 vec = s.uv1[idx];
                      Vector2 iv = (Vector2)v;
@@ -317,7 +398,7 @@ namespace JBooth.VertexPainterPro
                      s.uv1[idx] = vec;
                   }; 
                case FlowTarget.UV2_XY:
-                  return delegate(int idx, ref object v)
+                  return delegate(VertexInstanceStream s, int idx, ref object v)
                   {
                      Vector4 vec = s.uv2[idx];
                      Vector2 iv = (Vector2)v;
@@ -326,7 +407,7 @@ namespace JBooth.VertexPainterPro
                      s.uv2[idx] = vec;
                   }; 
                case FlowTarget.UV2_ZW:
-                  return delegate(int idx, ref object v)
+                  return delegate(VertexInstanceStream s, int idx, ref object v)
                   {
                      Vector4 vec = s.uv2[idx];
                      Vector2 iv = (Vector2)v;
@@ -335,7 +416,7 @@ namespace JBooth.VertexPainterPro
                      s.uv2[idx] = vec;
                   }; 
                case FlowTarget.UV3_XY:
-                  return delegate(int idx, ref object v)
+                  return delegate(VertexInstanceStream s, int idx, ref object v)
                   {
                      Vector4 vec = s.uv3[idx];
                      Vector2 iv = (Vector2)v;
@@ -344,7 +425,7 @@ namespace JBooth.VertexPainterPro
                      s.uv3[idx] = vec;
                   }; 
                case FlowTarget.UV3_ZW:
-                  return delegate(int idx, ref object v)
+                  return delegate(VertexInstanceStream s, int idx, ref object v)
                   {
                      Vector4 vec = s.uv3[idx];
                      Vector2 iv = (Vector2)v;
@@ -358,392 +439,156 @@ namespace JBooth.VertexPainterPro
          switch (brushMode)
          {
             case BrushTarget.Color:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   s.colors[idx] *= (Color)v;
                };     
             case BrushTarget.ValueR:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   s.colors[idx].r *= (float)v;
                };
             case BrushTarget.ValueG:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   s.colors[idx].g *= (float)v;
                };
             case BrushTarget.ValueB:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   s.colors[idx].b *= (float)v;
                };
             case BrushTarget.ValueA:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   s.colors[idx].a *= (float)v;
                }; 
             case BrushTarget.UV0_X:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv0[idx];
                   vec.x *= (float)v;
                   s.uv0[idx] = vec;
                }; 
             case BrushTarget.UV0_Y:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv0[idx];
                   vec.y *= (float)v;
                   s.uv0[idx] = vec;
                }; 
             case BrushTarget.UV0_Z:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv0[idx];
                   vec.z *= (float)v;
                   s.uv0[idx] = vec;
                }; 
             case BrushTarget.UV0_W:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv0[idx];
                   vec.w *= (float)v;
                   s.uv0[idx] = vec;
                }; 
             case BrushTarget.UV1_X:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv1[idx];
                   vec.x *= (float)v;
                   s.uv1[idx] = vec;
                }; 
             case BrushTarget.UV1_Y:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv1[idx];
                   vec.y *= (float)v;
                   s.uv1[idx] = vec;
                }; 
             case BrushTarget.UV1_Z:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv1[idx];
                   vec.z *= (float)v;
                   s.uv1[idx] = vec;
                }; 
             case BrushTarget.UV1_W:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv1[idx];
                   vec.w *= (float)v;
                   s.uv1[idx] = vec;
                }; 
             case BrushTarget.UV2_X:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv2[idx];
                   vec.x *= (float)v;
                   s.uv2[idx] = vec;
                }; 
             case BrushTarget.UV2_Y:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv2[idx];
                   vec.y *= (float)v;
                   s.uv2[idx] = vec;
                }; 
             case BrushTarget.UV2_Z:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv2[idx];
                   vec.z *= (float)v;
                   s.uv2[idx] = vec;
                }; 
             case BrushTarget.UV2_W:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv2[idx];
                   vec.w *= (float)v;
                   s.uv2[idx] = vec;
                }; 
             case BrushTarget.UV3_X:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv3[idx];
                   vec.x *= (float)v;
                   s.uv3[idx] = vec;
                }; 
             case BrushTarget.UV3_Y:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv3[idx];
                   vec.y *= (float)v;
                   s.uv3[idx] = vec;
                };
             case BrushTarget.UV3_Z:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv3[idx];
                   vec.z *= (float)v;
                   s.uv3[idx] = vec;
                }; 
             case BrushTarget.UV3_W:
-               return delegate(int idx, ref object v)
+               return delegate(VertexInstanceStream s, int idx, ref object v)
                {
                   Vector4 vec = s.uv3[idx];
                   vec.w *= (float)v;
                   s.uv3[idx] = vec;
                }; 
 
-         }
-         return null;
-      }
-
-      delegate void Lerper(int idx,ref object x,float strength);
-      
-      Lerper GetLerper(VertexInstanceStream s)
-      {
-         if (tab == Tab.Flow)
-         {
-            switch (flowTarget)
-            {
-               case FlowTarget.ColorRG:
-                  return delegate(int idx, ref object v, float r)
-                  { 
-                     Vector2 vv = (Vector2)v;
-                     Color c = s.colors[idx];
-                     s.colors[idx].r = Mathf.Lerp(c.r, vv.x, r);
-                     s.colors[idx].g = Mathf.Lerp(c.g, vv.y, r); 
-                  }; 
-               case FlowTarget.ColorBA:
-                  return delegate(int idx, ref object v, float r)
-                  { 
-                     Vector2 vv = (Vector2)v;
-                     Color c = s.colors[idx];
-                     s.colors[idx].b = Mathf.Lerp(c.r, vv.x, r);
-                     s.colors[idx].a = Mathf.Lerp(c.g, vv.y, r); 
-                  }; 
-               case FlowTarget.UV0_XY:
-                  return delegate(int idx, ref object v, float r)
-                  {
-                     Vector4 o = s.uv0[idx];
-                     Vector2 t = (Vector2)v;
-                     o.x = Mathf.Lerp(o.x, t.x, r);
-                     o.y = Mathf.Lerp(o.y, t.y, r);
-                     s.uv0[idx] = o;
-                  };
-               case FlowTarget.UV0_ZW:
-                  return delegate(int idx, ref object v, float r)
-                  {
-                     Vector4 o = s.uv0[idx];
-                     Vector2 t = (Vector2)v;
-                     o.z = Mathf.Lerp(o.z, t.x, r);
-                     o.w = Mathf.Lerp(o.w, t.y, r);
-                     s.uv0[idx] = o;
-                  }; 
-               case FlowTarget.UV1_XY:
-                  return delegate(int idx, ref object v, float r)
-                  {
-                     Vector4 o = s.uv1[idx];
-                     Vector2 t = (Vector2)v;
-                     o.x = Mathf.Lerp(o.x, t.x, r);
-                     o.y = Mathf.Lerp(o.y, t.y, r);
-                     s.uv1[idx] = o;
-                  }; 
-               case FlowTarget.UV1_ZW:
-                  return delegate(int idx, ref object v, float r)
-                  {
-                     Vector4 o = s.uv1[idx];
-                     Vector2 t = (Vector2)v;
-                     o.z = Mathf.Lerp(o.z, t.x, r);
-                     o.w = Mathf.Lerp(o.w, t.y, r);
-                     s.uv1[idx] = o;
-                  }; 
-               case FlowTarget.UV2_XY:
-                  return delegate(int idx, ref object v, float r)
-                  {
-                     Vector4 o = s.uv2[idx];
-                     Vector2 t = (Vector2)v;
-                     o.x = Mathf.Lerp(o.x, t.x, r);
-                     o.y = Mathf.Lerp(o.y, t.y, r);
-                     s.uv2[idx] = o;
-                  }; 
-               case FlowTarget.UV2_ZW:
-                  return delegate(int idx, ref object v, float r)
-                  {
-                     Vector4 o = s.uv2[idx];
-                     Vector2 t = (Vector2)v;
-                     o.z = Mathf.Lerp(o.z, t.x, r);
-                     o.w = Mathf.Lerp(o.w, t.y, r);
-                     s.uv2[idx] = o;
-                  }; 
-               case FlowTarget.UV3_XY:
-                  return delegate(int idx, ref object v, float r)
-                  {
-                     Vector4 o = s.uv3[idx];
-                     Vector2 t = (Vector2)v;
-                     o.x = Mathf.Lerp(o.x, t.x, r);
-                     o.y = Mathf.Lerp(o.y, t.y, r);
-                     s.uv3[idx] = o;
-                  }; 
-               case FlowTarget.UV3_ZW:
-                  return delegate(int idx, ref object v, float r)
-                  {
-                     Vector4 o = s.uv3[idx];
-                     Vector2 t = (Vector2)v;
-                     o.z = Mathf.Lerp(o.z, t.x, r);
-                     o.w = Mathf.Lerp(o.w, t.y, r);
-                     s.uv3[idx] = o;
-                  }; 
-            }
-            return null;
-         }
-         switch (brushMode)
-         {
-            case BrushTarget.Color:
-               return delegate(int idx, ref object v, float r)
-               {
-                  s.colors[idx] = Color.Lerp(s.colors[idx], (Color)v, r);
-               };     
-            case BrushTarget.ValueR:
-               return delegate(int idx, ref object v, float r)
-               {
-                  s.colors[idx].r = Mathf.Lerp(s.colors[idx].r, (float)v, r);
-               };
-            case BrushTarget.ValueG:
-               return delegate(int idx, ref object v, float r)
-               {
-                  s.colors[idx].g = Mathf.Lerp(s.colors[idx].g, (float)v, r);
-               };
-            case BrushTarget.ValueB:
-               return delegate(int idx, ref object v, float r)
-               {
-                  s.colors[idx].b = Mathf.Lerp(s.colors[idx].b, (float)v, r);
-               };
-            case BrushTarget.ValueA:
-               return delegate(int idx, ref object v, float r)
-               {
-                  s.colors[idx].a = Mathf.Lerp(s.colors[idx].a, (float)v, r);
-               };
-            case BrushTarget.UV0_X:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv0[idx];
-                  vec.x = Mathf.Lerp(vec.x, (float)v, r);
-                  s.uv0[idx] = vec;
-               }; 
-            case BrushTarget.UV0_Y:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv0[idx];
-                  vec.y = Mathf.Lerp(vec.y, (float)v, r);
-                  s.uv0[idx] = vec;
-               }; 
-            case BrushTarget.UV0_Z:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv0[idx];
-                  vec.z = Mathf.Lerp(vec.z, (float)v, r);
-                  s.uv0[idx] = vec;
-               }; 
-            case BrushTarget.UV0_W:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv0[idx];
-                  vec.w = Mathf.Lerp(vec.w, (float)v, r);
-                  s.uv0[idx] = vec;
-               };   
-            case BrushTarget.UV1_X:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv1[idx];
-                  vec.x = Mathf.Lerp(vec.x, (float)v, r);
-                  s.uv1[idx] = vec;
-               }; 
-            case BrushTarget.UV1_Y:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv1[idx];
-                  vec.y = Mathf.Lerp(vec.y, (float)v, r);
-                  s.uv1[idx] = vec;
-               }; 
-            case BrushTarget.UV1_Z:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv1[idx];
-                  vec.z = Mathf.Lerp(vec.z, (float)v, r);
-                  s.uv1[idx] = vec;
-               }; 
-            case BrushTarget.UV1_W:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv1[idx];
-                  vec.w = Mathf.Lerp(vec.w, (float)v, r);
-                  s.uv1[idx] = vec;
-               }; 
-            case BrushTarget.UV2_X:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv2[idx];
-                  vec.x = Mathf.Lerp(vec.x, (float)v, r);
-                  s.uv2[idx] = vec;
-               }; 
-            case BrushTarget.UV2_Y:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv2[idx];
-                  vec.y = Mathf.Lerp(vec.y, (float)v, r);
-                  s.uv2[idx] = vec;
-               }; 
-            case BrushTarget.UV2_Z:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv2[idx];
-                  vec.z = Mathf.Lerp(vec.z, (float)v, r);
-                  s.uv2[idx] = vec;
-               }; 
-            case BrushTarget.UV2_W:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv2[idx];
-                  vec.w = Mathf.Lerp(vec.w, (float)v, r);
-                  s.uv2[idx] = vec;
-               }; 
-            case BrushTarget.UV3_X:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv3[idx];
-                  vec.x = Mathf.Lerp(vec.x, (float)v, r);
-                  s.uv3[idx] = vec;
-               }; 
-            case BrushTarget.UV3_Y:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv3[idx];
-                  vec.y = Mathf.Lerp(vec.y, (float)v, r);
-                  s.uv3[idx] = vec;
-               }; 
-            case BrushTarget.UV3_Z:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv3[idx];
-                  vec.z = Mathf.Lerp(vec.z, (float)v, r);
-                  s.uv3[idx] = vec;
-               };
-            case BrushTarget.UV3_W:
-               return delegate(int idx, ref object v, float r)
-               {
-                  Vector4 vec = s.uv3[idx];
-                  vec.w = Mathf.Lerp(vec.w, (float)v, r);
-                  s.uv3[idx] = vec;
-               };
-               
          }
          return null;
       }
 
       object GetBrushValue()
       {
+         if (tab == Tab.Custom)
+         {
+            if (customBrush != null)
+               return customBrush.GetBrushObject();
+            Debug.Log("Please assign a custom brush");
+            return null;
+         }
          if (tab == Tab.Flow)
          {
             return strokeDir;
@@ -853,6 +698,7 @@ namespace JBooth.VertexPainterPro
       public VertexContraint vertexContraint = VertexContraint.Normal;
       public bool            showVertexShader = false;
       public bool            showVertexPoints = false;
+      public VertexPainterCustomBrush customBrush;
 
       public enum BrushVisualization
       {
@@ -861,6 +707,8 @@ namespace JBooth.VertexPainterPro
       }
       public BrushVisualization brushVisualization = BrushVisualization.Sphere;
       public PaintJob[]      jobs = new PaintJob[0];
+      // bool used to know if we've registered an undo with this object or not
+      public bool[] jobEdits = new bool[0];
 
 
       public class PaintJob
@@ -873,6 +721,27 @@ namespace JBooth.VertexPainterPro
          public Vector3[] normals;
          public Vector4[] tangents;
 
+         // getters which take stream into account
+         public Vector3 GetPosition(int i)
+         {
+            if (stream.positions != null && stream.positions.Length == verts.Length)
+               return stream.positions[i];
+            return verts[i];
+         }
+
+         public Vector3 GetNormal(int i)
+         {
+            if (stream.normals != null && stream.normals.Length == verts.Length)
+               return stream.normals[i];
+            return normals[i];
+         }
+
+         public Vector4 GetTangent(int i)
+         {
+            if (stream.tangents != null && stream.tangents.Length == verts.Length)
+               return stream.tangents[i];
+            return tangents[i];
+         }
 
          public bool HasStream() { return _stream != null; }
          public VertexInstanceStream stream
@@ -1025,6 +894,7 @@ namespace JBooth.VertexPainterPro
          }
 
          jobs = pjs.ToArray();
+         jobEdits = new bool[jobs.Length];
          UpdateDisplayMode();
       }
 
@@ -1107,11 +977,11 @@ namespace JBooth.VertexPainterPro
       void FillMesh(PaintJob job)
       {
          PrepBrushMode(job);
-         var setter = GetSetter(job.stream);
+         var lerper = GetLerper();
          var val = GetBrushValue();
          for (int i = 0; i < job.verts.Length; ++i)
          {
-            setter.Invoke(i, ref val);
+            lerper.Invoke(job, i, ref val, 1);
          }
          job.stream.Apply();
       }
@@ -1122,7 +992,7 @@ namespace JBooth.VertexPainterPro
          int oldVal = brushValue;
          float oldFloat = floatBrushValue;
          PrepBrushMode(job);
-         var setter = GetSetter(job.stream);
+         var lerper = GetLerper();
          for (int i = 0; i < job.verts.Length; ++i)
          {
             brushColor = new Color(UnityEngine.Random.Range(0.0f, 1.0f), 
@@ -1132,7 +1002,7 @@ namespace JBooth.VertexPainterPro
             brushValue = UnityEngine.Random.Range(0, 255);
             floatBrushValue = UnityEngine.Random.Range(uvVisualizationRange.x, uvVisualizationRange.y);
             object v = GetBrushValue();
-            setter(i, ref v);
+            lerper(job, i, ref v, 1);
          }
          job.stream.Apply();
          brushColor = oldColor;
@@ -1229,30 +1099,84 @@ namespace JBooth.VertexPainterPro
          }
       }
 
+      void InitPositions(PaintJob j)
+      {
+         Vector3[] pos = j.stream.positions;
+         if (pos == null || pos.Length != j.verts.Length)
+         {
+            int vc = j.meshFilter.sharedMesh.vertexCount;
+            if (j.stream.positions == null || j.stream.positions.Length != vc)
+            {
+               j.stream.positions = new Vector3[j.meshFilter.sharedMesh.vertices.Length];
+               j.meshFilter.sharedMesh.vertices.CopyTo(j.stream.positions, 0);
+            }
+         }
+         return;
+      }
+
+      void InitNormalTangent(PaintJob j)
+      {
+         Vector3[] norms = j.stream.normals;
+         if (norms == null || norms.Length != j.verts.Length)
+         {
+            int vc = j.meshFilter.sharedMesh.vertexCount;
+            if (j.stream.normals == null || j.stream.normals.Length != vc)
+            {
+               j.stream.normals = new Vector3[j.meshFilter.sharedMesh.vertices.Length];
+               j.meshFilter.sharedMesh.normals.CopyTo(j.stream.normals, 0);
+            }
+            if (j.stream.tangents == null || j.stream.tangents.Length != vc)
+            {
+               j.stream.tangents = new Vector4[j.meshFilter.sharedMesh.vertices.Length];
+               j.meshFilter.sharedMesh.tangents.CopyTo(j.stream.tangents, 0);
+            }
+         }
+         return;
+      }
+
       void PrepBrushMode(PaintJob j)
       {
-         if (tab == Tab.Deform)
+         if (tab == Tab.Custom)
          {
-            Vector3[] pos = j.stream.positions;
-            if (pos == null || pos.Length != j.verts.Length)
+            if (customBrush == null)
             {
-               int vc = j.meshFilter.sharedMesh.vertexCount;
-               if (j.stream.positions == null || j.stream.positions.Length != vc)
-               {
-                  j.stream.positions = new Vector3[j.meshFilter.sharedMesh.vertices.Length];
-                  j.meshFilter.sharedMesh.vertices.CopyTo(j.stream.positions, 0);
-               }
-               if (j.stream.normals == null || j.stream.normals.Length != vc)
-               {
-                  j.stream.normals = new Vector3[j.meshFilter.sharedMesh.vertices.Length];
-                  j.meshFilter.sharedMesh.normals.CopyTo(j.stream.normals, 0);
-               }
-               if (j.stream.tangents == null || j.stream.tangents.Length != vc)
-               {
-                  j.stream.tangents = new Vector4[j.meshFilter.sharedMesh.vertices.Length];
-                  j.meshFilter.sharedMesh.tangents.CopyTo(j.stream.tangents, 0);
-               }
+               Debug.Log("Custom Brush not set");
+               return;
             }
+            var channels = customBrush.GetChannels();
+            if ((channels & VertexPainterCustomBrush.Channels.Colors) != 0)
+            {
+               InitColors(j);
+            }
+            if ((channels & VertexPainterCustomBrush.Channels.UV0) != 0)
+            {
+               InitUV0(j);
+            }
+            if ((channels & VertexPainterCustomBrush.Channels.UV1) != 0)
+            {
+               InitUV1(j);
+            }
+            if ((channels & VertexPainterCustomBrush.Channels.UV2) != 0)
+            {
+               InitUV2(j);
+            }
+            if ((channels & VertexPainterCustomBrush.Channels.UV3) != 0)
+            {
+               InitUV3(j);
+            }
+            if ((channels & VertexPainterCustomBrush.Channels.Positions) != 0)
+            {
+               InitPositions(j);
+            }
+            if ((channels & VertexPainterCustomBrush.Channels.Normals) != 0)
+            {
+               InitNormalTangent(j);
+            }
+         }
+         else if (tab == Tab.Deform)
+         {
+            InitPositions(j);
+            InitNormalTangent(j);
             return;
          }
          if (tab == Tab.Flow)
@@ -1366,9 +1290,9 @@ namespace JBooth.VertexPainterPro
       }
 
 
-      void PaintMesh(PaintJob j, Vector3 point)
+      void PaintMesh(PaintJob j, Vector3 point, Lerper lerper, object value)
       {
-         Profiler.BeginSample("Paint Mesh");
+         bool affected = false;
          PrepBrushMode(j);
          // convert point into local space, so we don't have to convert every point
          point = j.renderer.transform.worldToLocalMatrix.MultiplyPoint3x4(point);
@@ -1377,8 +1301,7 @@ namespace JBooth.VertexPainterPro
          float scale = 1.0f / Mathf.Abs(j.renderer.transform.lossyScale.x);
 
          float bz = scale * brushSize;
-         var lerper = GetLerper(j.stream);
-         var value = GetBrushValue();
+
          float pressure = Event.current.pressure > 0 ? Event.current.pressure : 1.0f;
 
          bool modPos = !(j.stream.positions == null || j.stream.positions.Length == 0);
@@ -1440,7 +1363,8 @@ namespace JBooth.VertexPainterPro
                   float finalStr = str * (float)deltaTime * brushFlow * pressure;
                   if (finalStr > 0)
                   {
-                     lerper.Invoke(i, ref obj, finalStr);
+                     affected = true;
+                     lerper.Invoke(j, i, ref obj, finalStr);
                   }
                }
             }
@@ -1454,13 +1378,13 @@ namespace JBooth.VertexPainterPro
                {
                   float str = 1.0f - d / bz;
                   str = Mathf.Pow(str, brushFalloff);
+                  affected = true;
                   PaintVertPosition(j, i,  str * (float)deltaTime * brushFlow * pressure);
                }
             }
          }
          else
          {
-            Profiler.BeginSample("Paint Color");
             for (int i = 0; i < j.verts.Length; ++i)
             {
                float d = Vector3.Distance(point, j.verts[i]);
@@ -1471,15 +1395,16 @@ namespace JBooth.VertexPainterPro
                   float finalStr = str * (float)deltaTime * brushFlow * pressure;
                   if (finalStr > 0)
                   {
-                     lerper.Invoke(i, ref value, finalStr);
+                     affected = true;
+                     lerper.Invoke(j, i, ref value, finalStr);
                   }
                }
             }
-            Profiler.EndSample();
          }
-
-         j.stream.Apply();
-         Profiler.EndSample();
+         if (affected)
+         {
+            j.stream.Apply();
+         }
       }
 
       void EndStroke()
@@ -1749,12 +1674,40 @@ namespace JBooth.VertexPainterPro
          Vector3 point = sceneView.camera.ScreenToWorldPoint(fakeMP);
          Vector3 normal = Vector3.forward;
          Ray ray = sceneView.camera.ScreenPointToRay(mousePosition);
+
+         bool registerUndo = (Event.current.type == EventType.MouseDown && Event.current.button == 0 && Event.current.alt == false);
+         bool toggleWireframe = (Event.current.type == EventType.KeyUp && Event.current.control);
+
          for (int i = 0; i < jobs.Length; ++i)
          {
             if (jobs[i] == null || jobs[i].meshFilter == null)
                continue;
+
+            // Early out if we're not in the area..
+            Bounds b = jobs[i].renderer.bounds;
+            b.Expand(brushSize*2);
+            if (!b.IntersectRay(ray))
+            {
+               continue;
+            }
+
+            if (registerUndo)
+            {
+               painting = true;
+               // clear job edits
+               for (int x = 0; x < jobEdits.Length; ++x)
+               {
+                  jobEdits[x] = false;
+               }
+            }
+            if (toggleWireframe)
+            {
+               EditorUtility.SetSelectedWireframeHidden(jobs[i].renderer, hideMeshWireframe);
+            }
+
             Matrix4x4 mtx = jobs[i].meshFilter.transform.localToWorldMatrix;
             Mesh msh = jobs[i].meshFilter.sharedMesh;
+
             if (jobs[i].HasStream())
             {
                msh = jobs[i].stream.GetModifierMesh(); 
@@ -1797,6 +1750,12 @@ namespace JBooth.VertexPainterPro
                }
             }  
          }
+
+         if (Event.current.type == EventType.KeyUp && Event.current.control && Event.current.keyCode == KeyCode.V)
+         {
+            showVertexShader = !showVertexShader;
+            UpdateDisplayMode();
+         }
          strokeDir = Vector3.zero;
          if (tab == Tab.Flow || vertexMode == VertexMode.Smear)
          {
@@ -1813,39 +1772,11 @@ namespace JBooth.VertexPainterPro
          {
             strokeDir = -sceneView.camera.transform.forward;
          }
-
-         if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && Event.current.alt == false)
-         {
-            painting = true;
-            for (int i = 0; i < jobs.Length; ++i)
-            {
-               Undo.RegisterCompleteObjectUndo(jobs[i].stream, "Vertex Painter Stroke");
-            }
-
-         }
             
-         if (Event.current.type == EventType.KeyUp && Event.current.control)
+         if (Event.current.type == EventType.MouseMove && Event.current.shift) 
          {
-            if (Event.current.keyCode == KeyCode.W)
-            {
-               hideMeshWireframe = !hideMeshWireframe;
-               for (int i = 0; i < jobs.Length; ++i)
-               {
-                  EditorUtility.SetSelectedWireframeHidden(jobs[i].renderer, hideMeshWireframe);
-               }
-            }
-            if (Event.current.keyCode == KeyCode.V)
-            {
-               showVertexShader = !showVertexShader;
-               UpdateDisplayMode();
-            }
-         }
-
-
-
-         if (Event.current.type == EventType.MouseMove && Event.current.shift) {
-            brushSize += Event.current.delta.x * (float)deltaTime * (float)6;
-            brushFalloff -= Event.current.delta.y * (float)deltaTime * (float)48;
+            brushSize += Event.current.delta.x * (float)deltaTime * 6.0f;
+            brushFalloff -= Event.current.delta.y * (float)deltaTime * 48.0f;
          }
 
          if (Event.current.rawType == EventType.MouseUp)
@@ -1858,7 +1789,11 @@ namespace JBooth.VertexPainterPro
          }
 
          // set brush color
-         if (brushMode == BrushTarget.Color)
+         if (tab == Tab.Custom && customBrush != null)
+         {
+            Handles.color = customBrush.GetPreviewColor();
+         }
+         else if (brushMode == BrushTarget.Color)
          {
             Handles.color = new Color(brushColor.r, brushColor.g, brushColor.b, 0.4f);
          }
@@ -1906,9 +1841,22 @@ namespace JBooth.VertexPainterPro
 
          if (jobs.Length > 0 && painting)
          {
+            var lerper = GetLerper();
+            var value = GetBrushValue();
             for (int i = 0; i < jobs.Length; ++i)
             {
-               PaintMesh(jobs[i], point);
+               Bounds b = jobs[i].renderer.bounds;
+               b.Expand(brushSize*2);
+               if (!b.IntersectRay(ray))
+               {
+                  continue;
+               }
+               if (jobEdits[i] == false)
+               {
+                  jobEdits[i] = true;
+                  Undo.RegisterCompleteObjectUndo(jobs[i].stream, "Vertex Painter Stroke");
+               }
+               PaintMesh(jobs[i], point, lerper, value);
                Undo.RecordObject(jobs[i].stream, "Vertex Painter Stroke");
 
             }

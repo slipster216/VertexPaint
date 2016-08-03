@@ -102,20 +102,20 @@ namespace JBooth.VertexPainterPro
             floatBrushValue = 1.0f;
             brushColor = Color.white;
             var val = GetBrushValue();
-            Setter setter = null;
+            Lerper lerper = null;
             Multiplier mult = null;
 
             if (aoBakeMode == AOBakeMode.Replace)
             {
-               setter = GetSetter(job.stream);
+               lerper = GetLerper();
                for (int i = 0; i < job.verts.Length; ++i)
                {
-                  setter.Invoke(i, ref val);
+                  lerper.Invoke(job, i, ref val, 1);
                }
             }
             else
             {
-               mult = GetMultiplier(job.stream);
+               mult = GetMultiplier();
             }
 
             for (int i = 0; i<verts.Length; i++) 
@@ -193,11 +193,11 @@ namespace JBooth.VertexPainterPro
                val = GetBrushValue();
                if (aoBakeMode == AOBakeMode.Replace)
                {
-                  setter.Invoke(i, ref val);
+                  lerper.Invoke(job, i, ref val, 1);
                }
                else
                {
-                  mult.Invoke(i, ref val);
+                  mult.Invoke(job.stream, i, ref val);
                }
             }
             job.stream.Apply();

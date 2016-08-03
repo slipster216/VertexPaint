@@ -26,11 +26,14 @@ namespace JBooth.VertexPainterPro
    	{
    		return IntersectRayMesh(ray,meshFilter.sharedMesh,meshFilter.transform.localToWorldMatrix,out hit);
    	}
-   	
+      static object[] parameters = new object[4];
    	public static bool IntersectRayMesh(Ray ray, Mesh mesh, Matrix4x4 matrix, out RaycastHit hit)
    	{
-   		var parameters = new object[]{ray,mesh,matrix,null};
-   		bool result = (bool)meth_IntersectRayMesh.Invoke(null,parameters);
+         parameters[0] = ray;
+         parameters[1] = mesh;
+         parameters[2] = matrix;
+         parameters[3] = null;
+   		bool result = (bool)meth_IntersectRayMesh.Invoke(null, parameters);
    		hit = (RaycastHit)parameters[3];
          return result;
       }

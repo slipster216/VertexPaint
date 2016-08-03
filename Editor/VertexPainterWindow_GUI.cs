@@ -49,6 +49,7 @@ namespace JBooth.VertexPainterPro
          Deform,
          Flow,
          Bake,
+         Custom
       }
 
       string[] tabNames =
@@ -56,7 +57,8 @@ namespace JBooth.VertexPainterPro
          "Paint",
          "Deform",
          "Flow",
-         "Bake"
+         "Bake",
+         "Custom"
       };
 
 
@@ -128,6 +130,10 @@ namespace JBooth.VertexPainterPro
          {
             DrawBakeGUI();
          }
+         else if (tab == Tab.Custom)
+         {
+            DrawCustomGUI();
+         }
          EditorGUILayout.EndScrollView();
       }
 
@@ -181,17 +187,18 @@ namespace JBooth.VertexPainterPro
          
          for (int i = 0; i < jobs.Length; ++i)
          {
-            if (jobs[i]._stream != null)
+            var stream = jobs[i]._stream;
+            if (stream != null)
             {
                int vertexCount = jobs[i].verts.Length;
                
-               hasColors = (jobs[i].stream.colors != null && jobs[i].stream.colors.Length == vertexCount);
-               hasUV0 = (jobs[i].stream.uv0 != null && jobs[i].stream.uv0.Count == vertexCount);
-               hasUV1 = (jobs[i].stream.uv1 != null && jobs[i].stream.uv1.Count == vertexCount);
-               hasUV2 = (jobs[i].stream.uv2 != null && jobs[i].stream.uv2.Count == vertexCount);
-               hasUV3 = (jobs[i].stream.uv3 != null && jobs[i].stream.uv3.Count == vertexCount);
-               hasPositions = (jobs[i].stream.positions != null && jobs[i].stream.positions.Length == vertexCount);
-               hasNormals = (jobs[i].stream.normals != null && jobs[i].stream.normals.Length == vertexCount);
+               hasColors = (stream.colors != null && stream.colors.Length == vertexCount);
+               hasUV0 = (stream.uv0 != null && stream.uv0.Count == vertexCount);
+               hasUV1 = (stream.uv1 != null && stream.uv1.Count == vertexCount);
+               hasUV2 = (stream.uv2 != null && stream.uv2.Count == vertexCount);
+               hasUV3 = (stream.uv3 != null && stream.uv3.Count == vertexCount);
+               hasPositions = (stream.positions != null && stream.positions.Length == vertexCount);
+               hasNormals = (stream.normals != null && stream.normals.Length == vertexCount);
             }
          }
          
@@ -202,8 +209,9 @@ namespace JBooth.VertexPainterPro
             for (int i = 0; i < jobs.Length; ++i)
             {
                Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
-               jobs[i].stream.colors = null;
-               jobs[i].stream.Apply();
+               var stream = jobs[i].stream;
+               stream.colors = null;
+               stream.Apply();
             }
             Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
          }
@@ -212,8 +220,9 @@ namespace JBooth.VertexPainterPro
             for (int i = 0; i < jobs.Length; ++i)
             {
                Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
-               jobs[i].stream.uv0 = null;
-               jobs[i].stream.Apply();
+               var stream = jobs[i].stream;
+               stream.uv0 = null;
+               stream.Apply();
             }
             Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
          }
@@ -222,8 +231,9 @@ namespace JBooth.VertexPainterPro
             for (int i = 0; i < jobs.Length; ++i)
             {
                Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
-               jobs[i].stream.uv1 = null;
-               jobs[i].stream.Apply();
+               var stream = jobs[i].stream;
+               stream.uv1 = null;
+               stream.Apply();
             }
             Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
          }
@@ -232,8 +242,9 @@ namespace JBooth.VertexPainterPro
             for (int i = 0; i < jobs.Length; ++i)
             {
                Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
-               jobs[i].stream.uv2 = null;
-               jobs[i].stream.Apply();
+               var stream = jobs[i].stream;
+               stream.uv2 = null;
+               stream.Apply();
             }
             Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
          }
@@ -242,8 +253,9 @@ namespace JBooth.VertexPainterPro
             for (int i = 0; i < jobs.Length; ++i)
             {
                Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
-               jobs[i].stream.uv3 = null;
-               jobs[i].stream.Apply();
+               var stream = jobs[i].stream;
+               stream.uv3 = null;
+               stream.Apply();
             }
             Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
          }
@@ -292,6 +304,35 @@ namespace JBooth.VertexPainterPro
          EditorGUILayout.Separator();
          GUILayout.Box("", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(1)});
          EditorGUILayout.Separator();
+
+      }
+
+
+      void DrawCustomGUI()
+      {
+
+         GUILayout.Box("Brush Settings", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(20)});
+         customBrush = EditorGUILayout.ObjectField("Brush", customBrush, typeof(VertexPainterCustomBrush), false) as VertexPainterCustomBrush;
+
+         DrawBrushSettingsGUI();
+
+         if (customBrush != null)
+         {
+            customBrush.DrawGUI();
+         }
+
+         EditorGUILayout.BeginHorizontal();
+         if (GUILayout.Button("Fill"))
+         {
+            for (int i = 0; i < jobs.Length; ++i)
+            {
+               Undo.RecordObject(jobs[i].stream, "Vertex Painter Fill");
+               FillMesh(jobs[i]);
+            }
+            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+         }
+
+         EditorGUILayout.EndHorizontal();
 
       }
 

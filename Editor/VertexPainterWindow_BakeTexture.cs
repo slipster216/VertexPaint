@@ -25,12 +25,18 @@ namespace JBooth.VertexPainterPro
          UV0,
          UV1,
          UV2,
-         UV3
+         UV3,
+         WorldSpaceXY,
+         WorldSpaceXZ,
+         WorldSpaceYZ
       }
 
       Texture2D bakingTex = null;
       BakeSourceUV bakeSourceUV = BakeSourceUV.UV0;
       BakeChannel bakeChannel = BakeChannel.Color;
+      Vector2 worldSpaceLower = new Vector2(0, 0);
+      Vector2 worldSpaceUpper = new Vector2(1, 1);
+
 
       
       void InitBakeChannel(BakeChannel bc)
@@ -164,6 +170,42 @@ namespace JBooth.VertexPainterPro
                         uv = job.stream.uv3[i];
                      else if (srcUV3 != null && srcUV3.Count == job.verts.Length)
                         uv = srcUV3[i];
+                     break;
+                  }
+                  case BakeSourceUV.WorldSpaceXY:
+                  {
+                     Vector3 pos = job.stream.transform.localToWorldMatrix.MultiplyPoint(job.GetPosition(i));
+                     Vector2 p = new Vector2(pos.x, pos.y) - worldSpaceLower;
+                     Vector2 scale = worldSpaceUpper - worldSpaceLower;
+                     scale.x = Mathf.Max(0.000001f, scale.x);
+                     scale.y = Mathf.Max(0.000001f, scale.y);
+                     uv = p;
+                     uv.x /= scale.x;
+                     uv.y /= scale.y;
+                     break;
+                  }
+                  case BakeSourceUV.WorldSpaceXZ:
+                  {
+                     Vector3 pos = job.stream.transform.localToWorldMatrix.MultiplyPoint(job.GetPosition(i));
+                     Vector2 p = new Vector2(pos.x, pos.z) - worldSpaceLower;
+                     Vector2 scale = worldSpaceUpper - worldSpaceLower;
+                     scale.x = Mathf.Max(0.000001f, scale.x);
+                     scale.y = Mathf.Max(0.000001f, scale.y);
+                     uv = p;
+                     uv.x /= scale.x;
+                     uv.y /= scale.y;
+                     break;
+                  }
+                  case BakeSourceUV.WorldSpaceYZ:
+                  {
+                     Vector3 pos = job.stream.transform.localToWorldMatrix.MultiplyPoint(job.GetPosition(i));
+                     Vector2 p = new Vector2(pos.y, pos.z) - worldSpaceLower;
+                     Vector2 scale = worldSpaceUpper - worldSpaceLower;
+                     scale.x = Mathf.Max(0.000001f, scale.x);
+                     scale.y = Mathf.Max(0.000001f, scale.y);
+                     uv = p;
+                     uv.x /= scale.x;
+                     uv.y /= scale.y;
                      break;
                   }
                }

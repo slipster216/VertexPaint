@@ -683,7 +683,7 @@ namespace JBooth.VertexPainterPro
          switch (brushMode)
          {
             case BrushTarget.Color:
-               return brushColor;   
+               return brushColor;  
             case BrushTarget.ValueR:
                return brushValue / 255.0f;
             case BrushTarget.ValueG:
@@ -692,6 +692,14 @@ namespace JBooth.VertexPainterPro
                return brushValue / 255.0f;
             case BrushTarget.ValueA:
                return brushValue / 255.0f;
+            case BrushTarget.UV0_AsColor:
+               return brushColor;  
+            case BrushTarget.UV1_AsColor:
+               return brushColor;  
+            case BrushTarget.UV2_AsColor:
+               return brushColor;  
+            case BrushTarget.UV3_AsColor:
+               return brushColor;   
             default:
                return floatBrushValue;
          }
@@ -1322,29 +1330,45 @@ namespace JBooth.VertexPainterPro
                   break;
                }
             case BrushTarget.UV0_X:
-               goto case BrushTarget.UV0_Y;
+               goto case BrushTarget.UV0_W;
             case BrushTarget.UV0_Y:
+               goto case BrushTarget.UV0_W;
+            case BrushTarget.UV0_Z:
+               goto case BrushTarget.UV0_W;
+            case BrushTarget.UV0_W:
                {
                   InitUV0(j);
                   break;
                }
             case BrushTarget.UV1_X:
-               goto case BrushTarget.UV1_Y;
+               goto case BrushTarget.UV1_W;
             case BrushTarget.UV1_Y:
+               goto case BrushTarget.UV1_W;
+            case BrushTarget.UV1_Z:
+               goto case BrushTarget.UV1_W;
+            case BrushTarget.UV1_W:
                {
                   InitUV1(j);
                   break;
                }
             case BrushTarget.UV2_X:
-               goto case BrushTarget.UV2_Y;
+               goto case BrushTarget.UV2_W;
             case BrushTarget.UV2_Y:
+               goto case BrushTarget.UV2_W;
+            case BrushTarget.UV2_Z:
+               goto case BrushTarget.UV2_W;
+            case BrushTarget.UV2_W:
                {
                   InitUV2(j);
                   break;
                }
             case BrushTarget.UV3_X:
-               goto case BrushTarget.UV3_Y;
+               goto case BrushTarget.UV3_W;
             case BrushTarget.UV3_Y:
+               goto case BrushTarget.UV3_W;
+            case BrushTarget.UV3_Z:
+               goto case BrushTarget.UV3_W;
+            case BrushTarget.UV3_W:
                {
                   InitUV3(j);
                   break;
@@ -1884,7 +1908,8 @@ namespace JBooth.VertexPainterPro
          {
             Handles.color = customBrush.GetPreviewColor();
          }
-         else if (brushMode == BrushTarget.Color)
+         else if (brushMode == BrushTarget.Color || brushMode == BrushTarget.UV0_AsColor || brushMode == BrushTarget.UV1_AsColor
+            || brushMode == BrushTarget.UV2_AsColor || brushMode == BrushTarget.UV3_AsColor)
          {
             Handles.color = new Color(brushColor.r, brushColor.g, brushColor.b, 0.4f);
          }

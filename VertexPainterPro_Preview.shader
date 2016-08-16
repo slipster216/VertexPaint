@@ -281,7 +281,22 @@ Shader "Hidden/VertexPainterPro_Preview"
             {
                float f = Range(v.uv3.w); o.color = fixed4(f,f,f,1);
             }
-
+            else if (_channel < 22)
+            {
+               o.color = v.uv0;
+            }
+            else if (_channel < 23)
+            {
+               o.color = v.uv1;
+            }
+            else if (_channel < 24)
+            {
+               o.color = v.uv2;
+            }
+            else if (_channel < 25)
+            {
+               o.color = v.uv3;
+            }
             return o;
          }
 

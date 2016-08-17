@@ -16,7 +16,7 @@ using UnityEditor;
 namespace JBooth.VertexPainterPro
 {
    // Allow the user to create brush objects as assets in an editor folder
-   [CreateAssetMenu(menuName = "Create/Vertex Painter Brush/Noise Brush", fileName="noise_brush")]
+   [CreateAssetMenu(menuName = "Vertex Painter Brush/Noise Brush", fileName="noise_brush")]
    public class VertexPainterNoiseBrush : VertexPainterCustomBrush 
    {
       // I like a little object to hold the brush settings..

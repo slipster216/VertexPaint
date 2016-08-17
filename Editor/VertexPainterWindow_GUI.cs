@@ -535,7 +535,7 @@ namespace JBooth.VertexPainterPro
          if (bakeSourceUV == BakeSourceUV.WorldSpaceXY || bakeSourceUV == BakeSourceUV.WorldSpaceXZ || bakeSourceUV == BakeSourceUV.WorldSpaceYZ)
          {
             worldSpaceLower = EditorGUILayout.Vector2Field("Lower world position", worldSpaceLower);
-            worldSpaceUpper = EditorGUILayout.Vector2Field("Lower world position", worldSpaceUpper);
+            worldSpaceUpper = EditorGUILayout.Vector2Field("Upper world position", worldSpaceUpper);
          }
          EditorGUILayout.BeginHorizontal();
          EditorGUILayout.Space();

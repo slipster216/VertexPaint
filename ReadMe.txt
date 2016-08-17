@@ -47,9 +47,7 @@ Bake
 	This tab contains a number of utilities, such as the ability to bake AO and lighting into the mesh data. You can also bake information from a texture into your vertices, bake pivot points into the UV channels of the mesh (allowing you to combine many objects and animate them individually in the shader). Finally, you can save meshes as disk assets from this tab.
 
 Custom
-   This tab allows you to work with custom brushes, which can be written to do just about anything you can imagine. An example
-   custom brush is included which paints simplex noise onto a model, but the system allows you to write your own custom brushes,
-   apply arbitrary transformations to the vertex data as you paint, as well as provide an interface for your brush.
+   This tab allows you to work with custom brushes, which can be written to do just about anything you can imagine. An example custom brush is included which paints simplex noise onto a model, but the system allows you to write your own custom brushes, apply arbitrary transformations to the vertex data as you paint, as well as provide an interface for your brush.
 
 Shaders
 

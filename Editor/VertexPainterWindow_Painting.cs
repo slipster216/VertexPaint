@@ -985,7 +985,7 @@ namespace JBooth.VertexPainterPro
             {
                MeshFilter mf = go.GetComponent<MeshFilter>();
                Renderer r = go.GetComponent<Renderer>();
-               if (mf != null && r != null && mf.sharedMesh.isReadable)
+               if (mf != null && r != null && mf.sharedMesh != null && mf.sharedMesh.isReadable)
                {
                   pjs.Add(new PaintJob(mf, r));
                }

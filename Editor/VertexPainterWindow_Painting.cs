@@ -115,6 +115,52 @@ namespace JBooth.VertexPainterPro
          var s = j.stream;
          s.colors[idx] = Color.Lerp(s.colors[idx], (Color)v, r);
       }
+      static void ColorRGBASaturate(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Color.RGBToHSV(st.colors[idx], out h, out s, out b);
+         s = Mathf.Lerp(s, 1.0f, r);
+         Color res = Color.HSVToRGB(h, s, b);
+         st.colors[idx] = new Color(res.r, res.g, res.b, st.colors[idx].a);
+      }
+      static void ColorRGBADesaturate(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Color.RGBToHSV(st.colors[idx], out h, out s, out b);
+         s = Mathf.Lerp(s, 0.0f, r);
+         Color res = Color.HSVToRGB(h, s, b);
+         st.colors[idx] = new Color(res.r, res.g, res.b, st.colors[idx].a);
+      }
+      static void ColorRGBALighten(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Color.RGBToHSV(st.colors[idx], out h, out s, out b);
+         b = Mathf.Lerp(b, 1.0f, r);
+         Color res = Color.HSVToRGB(h, s, b);
+         st.colors[idx] = new Color(res.r, res.g, res.b, st.colors[idx].a);
+      }
+      static void ColorRGBADarken(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Color.RGBToHSV(st.colors[idx], out h, out s, out b);
+         b = Mathf.Lerp(b, 0.0f, r);
+         Color res = Color.HSVToRGB(h, s, b);
+         st.colors[idx] = new Color(res.r, res.g, res.b, st.colors[idx].a);
+      }
+      static void ColorRGBAOverlay(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         Color c0 = st.colors[idx];
+         Color t = (Color)v;
+         c0.r = Mathf.Lerp(c0.r, c0.r < 0.5f ? (2.0f * c0.r * t.r) : (1.0f - 2.0f * (1.0f - c0.r) * (1.0f - t.r)), r);
+         c0.g = Mathf.Lerp(c0.g, c0.g < 0.5f ? (2.0f * c0.g * t.g) : (1.0f - 2.0f * (1.0f - c0.g) * (1.0f - t.g)), r);
+         c0.b = Mathf.Lerp(c0.b, c0.b < 0.5f ? (2.0f * c0.b * t.b) : (1.0f - 2.0f * (1.0f - c0.b) * (1.0f - t.b)), r);
+         st.colors[idx] = c0;
+      }
       static void ColorR(PaintJob j, int idx, ref object v, float r)
       {
          var s = j.stream;
@@ -279,6 +325,229 @@ namespace JBooth.VertexPainterPro
          Vector4 asVector = new Vector4(c.r, c.g, c.b, c.a);
          s.uv3[idx] = Vector4.Lerp(s.uv3[idx], asVector, r);
       }
+      static void UV0_AsColorRGBASaturate(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv0[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         s = Mathf.Lerp(s, 1.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv0[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV0_AsColorRGBADesaturate(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv0[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         s = Mathf.Lerp(s, 0.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv0[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV0_AsColorRGBALighten(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv0[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         b = Mathf.Lerp(b, 1.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv0[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV0_AsColorRGBADarken(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv0[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         b = Mathf.Lerp(b, 0.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv0[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV0_AsColorRGBAOverlay(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         Vector4 vec = st.uv0[idx];
+         Color c0 = new Color(vec.x, vec.y, vec.z);
+         Color t = (Color)v;
+         c0.r = Mathf.Lerp(c0.r, c0.r < 0.5f ? (2.0f * c0.r * t.r) : (1.0f - 2.0f * (1.0f - c0.r) * (1.0f - t.r)), r);
+         c0.g = Mathf.Lerp(c0.g, c0.g < 0.5f ? (2.0f * c0.g * t.g) : (1.0f - 2.0f * (1.0f - c0.g) * (1.0f - t.g)), r);
+         c0.b = Mathf.Lerp(c0.b, c0.b < 0.5f ? (2.0f * c0.b * t.b) : (1.0f - 2.0f * (1.0f - c0.b) * (1.0f - t.b)), r);
+         st.uv0[idx] = new Vector4(c0.r, c0.g, c0.b, vec.w);
+      }
+
+      static void UV1_AsColorRGBASaturate(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv1[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         s = Mathf.Lerp(s, 1.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv1[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV1_AsColorRGBADesaturate(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv1[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         s = Mathf.Lerp(s, 0.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv1[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV1_AsColorRGBALighten(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv1[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         b = Mathf.Lerp(b, 1.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv1[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV1_AsColorRGBADarken(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv1[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         b = Mathf.Lerp(b, 0.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv1[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV1_AsColorRGBAOverlay(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         Vector4 vec = st.uv1[idx];
+         Color c0 = new Color(vec.x, vec.y, vec.z);
+         Color t = (Color)v;
+         c0.r = Mathf.Lerp(c0.r, c0.r < 0.5f ? (2.0f * c0.r * t.r) : (1.0f - 2.0f * (1.0f - c0.r) * (1.0f - t.r)), r);
+         c0.g = Mathf.Lerp(c0.g, c0.g < 0.5f ? (2.0f * c0.g * t.g) : (1.0f - 2.0f * (1.0f - c0.g) * (1.0f - t.g)), r);
+         c0.b = Mathf.Lerp(c0.b, c0.b < 0.5f ? (2.0f * c0.b * t.b) : (1.0f - 2.0f * (1.0f - c0.b) * (1.0f - t.b)), r);
+         st.uv1[idx] = new Vector4(c0.r, c0.g, c0.b, vec.w);
+      }
+
+      static void UV2_AsColorRGBASaturate(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv2[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         s = Mathf.Lerp(s, 1.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv2[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV2_AsColorRGBADesaturate(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv2[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         s = Mathf.Lerp(s, 0.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv2[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV2_AsColorRGBALighten(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv2[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         b = Mathf.Lerp(b, 1.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv2[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV2_AsColorRGBADarken(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv2[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         b = Mathf.Lerp(b, 0.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv2[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV2_AsColorRGBAOverlay(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         Vector4 vec = st.uv2[idx];
+         Color c0 = new Color(vec.x, vec.y, vec.z);
+         Color t = (Color)v;
+         c0.r = Mathf.Lerp(c0.r, c0.r < 0.5f ? (2.0f * c0.r * t.r) : (1.0f - 2.0f * (1.0f - c0.r) * (1.0f - t.r)), r);
+         c0.g = Mathf.Lerp(c0.g, c0.g < 0.5f ? (2.0f * c0.g * t.g) : (1.0f - 2.0f * (1.0f - c0.g) * (1.0f - t.g)), r);
+         c0.b = Mathf.Lerp(c0.b, c0.b < 0.5f ? (2.0f * c0.b * t.b) : (1.0f - 2.0f * (1.0f - c0.b) * (1.0f - t.b)), r);
+         st.uv2[idx] = new Vector4(c0.r, c0.g, c0.b, vec.w);
+      }
+
+      static void UV3_AsColorRGBASaturate(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv3[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         s = Mathf.Lerp(s, 1.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv3[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV3_AsColorRGBADesaturate(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv3[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         s = Mathf.Lerp(s, 0.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv3[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV3_AsColorRGBALighten(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv3[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         b = Mathf.Lerp(b, 1.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv3[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV3_AsColorRGBADarken(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         float h, s, b;
+         Vector4 vec = st.uv3[idx];
+         Color c = new Color(vec.x, vec.y, vec.z);
+         Color.RGBToHSV(c, out h, out s, out b);
+         b = Mathf.Lerp(b, 0.0f, r);
+         c = Color.HSVToRGB(h, s, b);
+         st.uv3[idx] = new Vector4(c.r, c.g, c.b, vec.w);
+      }
+      static void UV3_AsColorRGBAOverlay(PaintJob j, int idx, ref object v, float r)
+      {
+         var st = j.stream;
+         Vector4 vec = st.uv3[idx];
+         Color c0 = new Color(vec.x, vec.y, vec.z);
+         Color t = (Color)v;
+         c0.r = Mathf.Lerp(c0.r, c0.r < 0.5f ? (2.0f * c0.r * t.r) : (1.0f - 2.0f * (1.0f - c0.r) * (1.0f - t.r)), r);
+         c0.g = Mathf.Lerp(c0.g, c0.g < 0.5f ? (2.0f * c0.g * t.g) : (1.0f - 2.0f * (1.0f - c0.g) * (1.0f - t.g)), r);
+         c0.b = Mathf.Lerp(c0.b, c0.b < 0.5f ? (2.0f * c0.b * t.b) : (1.0f - 2.0f * (1.0f - c0.b) * (1.0f - t.b)), r);
+         st.uv3[idx] = new Vector4(c0.r, c0.g, c0.b, vec.w);
+      }
 
       // I really wish I could Lerper[] and just return FlowLerpers[(int)flowTarget]..
       Lerper GetLerper()
@@ -325,7 +594,24 @@ namespace JBooth.VertexPainterPro
          switch (brushMode)
          {
             case BrushTarget.Color:
-               return ColorRGBA;   
+               {
+                  switch (brushColorMode)
+                  {
+                     case BrushColorMode.Normal:
+                        return ColorRGBA;   
+                     case BrushColorMode.Overlay:
+                        return ColorRGBAOverlay;
+                     case BrushColorMode.Lighten:
+                        return ColorRGBALighten;
+                     case BrushColorMode.Darken:
+                        return ColorRGBADarken;
+                     case BrushColorMode.Saturate:
+                        return ColorRGBASaturate;
+                     case BrushColorMode.Desaturate:
+                        return ColorRGBADesaturate;
+                  }
+               }
+               return ColorRGBA;  
             case BrushTarget.ValueR:
                return ColorR;
             case BrushTarget.ValueG:
@@ -367,13 +653,81 @@ namespace JBooth.VertexPainterPro
             case BrushTarget.UV3_W:
                return UV3_W;
             case BrushTarget.UV0_AsColor:
-               return UV0_AsColor;
+            {
+               switch (brushColorMode)
+               {
+                  case BrushColorMode.Normal:
+                     return UV0_AsColor;   
+                  case BrushColorMode.Overlay:
+                     return UV0_AsColorRGBAOverlay;
+                  case BrushColorMode.Lighten:
+                     return UV0_AsColorRGBALighten;
+                  case BrushColorMode.Darken:
+                     return UV0_AsColorRGBADarken;
+                  case BrushColorMode.Saturate:
+                     return UV0_AsColorRGBASaturate;
+                  case BrushColorMode.Desaturate:
+                     return UV0_AsColorRGBADesaturate;
+               }
+               return UV0_AsColor; 
+            }
             case BrushTarget.UV1_AsColor:
-               return UV1_AsColor;
+               {
+                  switch (brushColorMode)
+                  {
+                     case BrushColorMode.Normal:
+                        return UV1_AsColor;   
+                     case BrushColorMode.Overlay:
+                        return UV1_AsColorRGBAOverlay;
+                     case BrushColorMode.Lighten:
+                        return UV1_AsColorRGBALighten;
+                     case BrushColorMode.Darken:
+                        return UV1_AsColorRGBADarken;
+                     case BrushColorMode.Saturate:
+                        return UV1_AsColorRGBASaturate;
+                     case BrushColorMode.Desaturate:
+                        return UV1_AsColorRGBADesaturate;
+                  }
+               }
+               return UV1_AsColor; 
             case BrushTarget.UV2_AsColor:
-               return UV2_AsColor;
+               {
+                  switch (brushColorMode)
+                  {
+                     case BrushColorMode.Normal:
+                        return UV2_AsColor;   
+                     case BrushColorMode.Overlay:
+                        return UV2_AsColorRGBAOverlay;
+                     case BrushColorMode.Lighten:
+                        return UV2_AsColorRGBALighten;
+                     case BrushColorMode.Darken:
+                        return UV2_AsColorRGBADarken;
+                     case BrushColorMode.Saturate:
+                        return UV2_AsColorRGBASaturate;
+                     case BrushColorMode.Desaturate:
+                        return UV2_AsColorRGBADesaturate;
+                  }
+               }
+               return UV2_AsColor; 
             case BrushTarget.UV3_AsColor:
-               return UV3_AsColor;
+               {
+                  switch (brushColorMode)
+                  {
+                     case BrushColorMode.Normal:
+                        return UV3_AsColor;   
+                     case BrushColorMode.Overlay:
+                        return UV3_AsColorRGBAOverlay;
+                     case BrushColorMode.Lighten:
+                        return UV3_AsColorRGBALighten;
+                     case BrushColorMode.Darken:
+                        return UV3_AsColorRGBADarken;
+                     case BrushColorMode.Saturate:
+                        return UV3_AsColorRGBASaturate;
+                     case BrushColorMode.Desaturate:
+                        return UV3_AsColorRGBADesaturate;
+                  }
+               }
+               return UV3_AsColor; 
                
          }
          return null;
@@ -760,6 +1114,16 @@ namespace JBooth.VertexPainterPro
          UV2_AsColor,
          UV3_AsColor
       }
+
+      public enum BrushColorMode
+      {
+         Normal,
+         Overlay,
+         Lighten,
+         Darken,
+         Saturate,
+         Desaturate
+      }
       
       public enum VertexMode
       {
@@ -788,6 +1152,7 @@ namespace JBooth.VertexPainterPro
       public float           floatBrushValue = 1.0f;
       public Vector2         uvVisualizationRange = new Vector2(0, 1);
       public BrushTarget     brushMode = BrushTarget.Color;
+      public BrushColorMode  brushColorMode = BrushColorMode.Normal;
       public VertexMode      vertexMode = VertexMode.Adjust;
       public FlowTarget      flowTarget = FlowTarget.ColorRG;
       public FlowBrushType   flowBrushType = FlowBrushType.Direction;
@@ -1369,6 +1734,26 @@ namespace JBooth.VertexPainterPro
             case BrushTarget.UV3_Z:
                goto case BrushTarget.UV3_W;
             case BrushTarget.UV3_W:
+               {
+                  InitUV3(j);
+                  break;
+               }
+            case BrushTarget.UV0_AsColor:
+               {
+                  InitUV0(j);
+                  break;
+               }
+            case BrushTarget.UV1_AsColor:
+               {
+                  InitUV1(j);
+                  break;
+               }
+            case BrushTarget.UV2_AsColor:
+               {
+                  InitUV2(j);
+                  break;
+               }
+            case BrushTarget.UV3_AsColor:
                {
                   InitUV3(j);
                   break;

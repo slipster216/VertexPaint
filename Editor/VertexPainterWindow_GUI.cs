@@ -349,40 +349,44 @@ namespace JBooth.VertexPainterPro
          if (brushMode == BrushTarget.Color || brushMode == BrushTarget.UV0_AsColor || brushMode == BrushTarget.UV1_AsColor
             || brushMode == BrushTarget.UV2_AsColor || brushMode == BrushTarget.UV3_AsColor)
          {
-            brushColor = EditorGUILayout.ColorField("Brush Color", brushColor);
+            brushColorMode = (BrushColorMode)EditorGUILayout.EnumPopup("Blend Mode", (System.Enum)brushColorMode);
 
-            if (GUILayout.Button("Reset Palette", EditorStyles.miniButton, GUILayout.Width(80), GUILayout.Height(16))) 
+            if (brushColorMode == BrushColorMode.Overlay || brushColorMode == BrushColorMode.Normal)
             {
-               if (swatches != null)
-               {
-                  DestroyImmediate(swatches);
-               }
-               swatches = ColorSwatches.CreateInstance<ColorSwatches>();
-               EditorPrefs.SetString(sSwatchKey, JsonUtility.ToJson(swatches,false));
-            }
+               brushColor = EditorGUILayout.ColorField("Brush Color", brushColor);
 
-            GUILayout.BeginHorizontal();
-
-            for (int i = 0; i < swatches.colors.Length; ++i) 
-            {
-               if (GUILayout.Button("", EditorStyles.textField, GUILayout.Width(16), GUILayout.Height(16))) 
+               if (GUILayout.Button("Reset Palette", EditorStyles.miniButton, GUILayout.Width(80), GUILayout.Height(16)))
                {
-                  brushColor = swatches.colors[i];
-               }
-               EditorGUI.DrawRect(new Rect(GUILayoutUtility.GetLastRect().x + 1, GUILayoutUtility.GetLastRect().y + 1, 14, 14), swatches.colors[i]);
-            }
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            for (int i = 0; i < swatches.colors.Length; i++) 
-            {
-               if (GUILayout.Button("+", EditorStyles.miniButton, GUILayout.Width(16), GUILayout.Height(12))) 
-               {
-                  swatches.colors[i] = brushColor;
+                  if (swatches != null)
+                  {
+                     DestroyImmediate(swatches);
+                  }
+                  swatches = ColorSwatches.CreateInstance<ColorSwatches>();
                   EditorPrefs.SetString(sSwatchKey, JsonUtility.ToJson(swatches, false));
                }
-            }
-            GUILayout.EndHorizontal();
+            
+               GUILayout.BeginHorizontal();
 
+               for (int i = 0; i < swatches.colors.Length; ++i)
+               {
+                  if (GUILayout.Button("", EditorStyles.textField, GUILayout.Width(16), GUILayout.Height(16)))
+                  {
+                     brushColor = swatches.colors[i];
+                  }
+                  EditorGUI.DrawRect(new Rect(GUILayoutUtility.GetLastRect().x + 1, GUILayoutUtility.GetLastRect().y + 1, 14, 14), swatches.colors[i]);
+               }
+               GUILayout.EndHorizontal();
+               GUILayout.BeginHorizontal();
+               for (int i = 0; i < swatches.colors.Length; i++)
+               {
+                  if (GUILayout.Button("+", EditorStyles.miniButton, GUILayout.Width(16), GUILayout.Height(12)))
+                  {
+                     swatches.colors[i] = brushColor;
+                     EditorPrefs.SetString(sSwatchKey, JsonUtility.ToJson(swatches, false));
+                  }
+               }
+               GUILayout.EndHorizontal();
+            }
          }
          else if (brushMode == BrushTarget.ValueR || brushMode == BrushTarget.ValueG || brushMode == BrushTarget.ValueB || brushMode == BrushTarget.ValueA)
          {

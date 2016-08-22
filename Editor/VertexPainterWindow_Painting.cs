@@ -615,7 +615,7 @@ namespace JBooth.VertexPainterPro
             case BrushTarget.ValueR:
                return ColorR;
             case BrushTarget.ValueG:
-               return ColorR;
+               return ColorG;
             case BrushTarget.ValueB:
                return ColorB;
             case BrushTarget.ValueA:

@@ -560,12 +560,17 @@ namespace JBooth.VertexPainterPro
          GUILayout.Space(10);
          GUILayout.Box("Bake Pivot", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(20)});
          pivotTarget = (PivotTarget)EditorGUILayout.EnumPopup("Store in", pivotTarget);
+         bakePivotUseLocal = EditorGUILayout.Toggle("Use Local Space", bakePivotUseLocal);
 
          EditorGUILayout.BeginHorizontal();
          EditorGUILayout.Space();
-         if (GUILayout.Button("Bake"))
+         if (GUILayout.Button("Bake Pivot"))
          {
             BakePivot();
+         }
+         if (GUILayout.Button("Bake Rotation"))
+         {
+            BakeRotation();
          }
          EditorGUILayout.Space();
          EditorGUILayout.EndHorizontal();

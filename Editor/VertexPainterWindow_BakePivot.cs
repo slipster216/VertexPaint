@@ -22,6 +22,53 @@ namespace JBooth.VertexPainterPro
       }
 
       PivotTarget pivotTarget = PivotTarget.UV2;
+      bool bakePivotUseLocal = true;
+      void BakeRotation()
+      {
+         switch (pivotTarget)
+         {
+            case PivotTarget.UV0:
+               {
+                  InitBakeChannel(BakeChannel.UV0);
+                  foreach (PaintJob job in jobs)
+                  {
+                     Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localRotation.eulerAngles : job.meshFilter.transform.rotation.eulerAngles;
+                     job.stream.SetUV0(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
+                  }
+                  break;
+               }
+            case PivotTarget.UV1:
+               {
+                  InitBakeChannel(BakeChannel.UV1);
+                  foreach (PaintJob job in jobs)
+                  {
+                     Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localRotation.eulerAngles : job.meshFilter.transform.rotation.eulerAngles;
+                     job.stream.SetUV1(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
+                  }
+                  break;
+               }
+            case PivotTarget.UV2:
+               {
+                  InitBakeChannel(BakeChannel.UV2);
+                  foreach (PaintJob job in jobs)
+                  {
+                     Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localRotation.eulerAngles : job.meshFilter.transform.rotation.eulerAngles;
+                     job.stream.SetUV2(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
+                  }
+                  break;
+               }
+            case PivotTarget.UV3:
+               {
+                  InitBakeChannel(BakeChannel.UV3);
+                  foreach (PaintJob job in jobs)
+                  {
+                     Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localRotation.eulerAngles : job.meshFilter.transform.rotation.eulerAngles;
+                     job.stream.SetUV3(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
+                  }
+                  break;
+               }
+         }
+      }
 
       void BakePivot()
       {
@@ -32,7 +79,7 @@ namespace JBooth.VertexPainterPro
                InitBakeChannel(BakeChannel.UV0);
                foreach (PaintJob job in jobs)
                {
-                  Vector3 lp = job.meshFilter.transform.localPosition;
+                  Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localPosition : job.meshFilter.transform.position;
                   job.stream.SetUV0(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
                }
                break;
@@ -42,7 +89,7 @@ namespace JBooth.VertexPainterPro
                InitBakeChannel(BakeChannel.UV1);
                foreach (PaintJob job in jobs)
                {
-                  Vector3 lp = job.meshFilter.transform.localPosition;
+                  Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localPosition : job.meshFilter.transform.position;
                   job.stream.SetUV1(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
                }
                break;
@@ -52,7 +99,7 @@ namespace JBooth.VertexPainterPro
                   InitBakeChannel(BakeChannel.UV2);
                   foreach (PaintJob job in jobs)
                   {
-                     Vector3 lp = job.meshFilter.transform.localPosition;
+                     Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localPosition : job.meshFilter.transform.position;
                      job.stream.SetUV2(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
                   }
                   break;
@@ -62,7 +109,7 @@ namespace JBooth.VertexPainterPro
                InitBakeChannel(BakeChannel.UV3);
                foreach (PaintJob job in jobs)
                {
-                  Vector3 lp = job.meshFilter.transform.localPosition;
+                  Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localPosition : job.meshFilter.transform.position;
                   job.stream.SetUV3(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
                }
                break;

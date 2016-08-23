@@ -1,37 +1,39 @@
-﻿// Sub-Optimal shader example that rotates objects around the pivot of the original object. Pivot position is
-// baked into UV2..
+﻿// Sub-Optimal shader example that rotates objects around the local space pivot of the original object. Pivot position and
+// rotation stored in UV2/UV3 respectively.
 
-Shader "Unlit/pivot"
+
+Shader "Unlit/pivot_aligned"
 {
 	Properties
-	{
-		
-	}
-	SubShader
-	{
-		Tags { "RenderType"="Opaque" }
-		LOD 100
+   {
+      
+   }
+   SubShader
+   {
+      Tags { "RenderType"="Opaque" }
+      LOD 100
 
-		Pass
-		{
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
+      Pass
+      {
+         CGPROGRAM
+         #pragma vertex vert
+         #pragma fragment frag
 
-			#include "UnityCG.cginc"
+         
+         #include "UnityCG.cginc"
 
-			struct appdata
-			{
-				float4 vertex : POSITION;
+         struct appdata
+         {
+            float4 vertex : POSITION;
             float4 pivot : TEXCOORD2;
             float3 rotation : TEXCOORD3;
-			};
+         };
 
-			struct v2f
-			{
-				float4 vertex : SV_POSITION;
+         struct v2f
+         {
+            float4 vertex : SV_POSITION;
             float4 color : TEXCOORD0;
-			};
+         };
          
 
          float4 RotateXYZ(float4 p, float3 rotate)
@@ -64,33 +66,34 @@ Shader "Unlit/pivot"
             return rxyz;
          }
 
-			v2f vert (appdata v)
-			{
-				v2f o;
+         v2f vert (appdata v)
+         {
+            v2f o;
 
             // total rotation to apply in radians
-            float3 rotate = float3(0, _Time.y, 0);
+            float3 rotate = float3(_Time.y, 0, 0);
 
             // compute the vertex location as an offset from the pivot point
             float4 pivot = v.pivot;
             float4 offset = v.vertex - pivot;
             // rotate around each axis
+            offset = RotateXYZ(offset, radians(v.rotation));
             float4 rxyz = RotateXYZ(offset, rotate);
-
+            rxyz = RotateXYZ(rxyz, -radians(v.rotation));
             // take the final rotation, and add the pivot back in to get our final position, then transform into MVP space
             o.vertex = mul(UNITY_MATRIX_MVP, rxyz + pivot);
             // the baker puts a random number into the W channel. This is VERY useful, for instance, if you want
             // each object to rotate at a random speed or at a random angle, or for use in a random function as
             // a seed.
             o.color = v.pivot.wwww;
-				return o;
-			}
-			
-			fixed4 frag (v2f i) : SV_Target
-			{
-				return i.color;
+            return o;
          }
-			ENDCG
-		}
-	}
+         
+         fixed4 frag (v2f i) : SV_Target
+         {
+            return i.color;
+         }
+         ENDCG
+      }
+   }
 }

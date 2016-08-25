@@ -341,14 +341,14 @@ namespace JBooth.VertexPainterPro
          MeshRenderer mr = GetComponent<MeshRenderer>();
          MeshFilter mf = GetComponent<MeshFilter>();
 
-         if (mr != null && mf != null)
+         if (mr != null && mf != null && mf.sharedMesh != null)
          {
             int vertexCount = mf.sharedMesh.vertexCount;
             Mesh stream = null;
    #if UNITY_EDITOR
             stream = meshStream;
    #endif
-            if (stream == null || vertexCount != stream.vertexCount && mf.sharedMesh != null)
+            if (stream == null || vertexCount != stream.vertexCount)
             {
                if (stream != null)
                {

@@ -348,7 +348,7 @@ namespace JBooth.VertexPainterPro
    #if UNITY_EDITOR
             stream = meshStream;
    #endif
-            if (stream == null || vertexCount != stream.vertexCount)
+            if (stream == null || vertexCount != stream.vertexCount && mf.sharedMesh != null)
             {
                if (stream != null)
                {

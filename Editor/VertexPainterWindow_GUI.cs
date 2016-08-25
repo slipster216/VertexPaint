@@ -509,7 +509,7 @@ namespace JBooth.VertexPainterPro
          brushMode = (BrushTarget)EditorGUILayout.EnumPopup("Target Channel", brushMode);
          aoSamples = EditorGUILayout.IntSlider("Samples", aoSamples, 64, 1024);
          EditorGUILayout.BeginHorizontal();
-         aoRange = EditorGUILayout.Vector2Field("Range", aoRange);
+         aoRange = EditorGUILayout.Vector2Field("Range (Min, Max)", aoRange);
          aoRange.x = Mathf.Max(aoRange.x, 0.0001f);
          EditorGUILayout.EndHorizontal();
          aoIntensity = EditorGUILayout.Slider("Intensity", aoIntensity, 0.25f, 4.0f);
@@ -572,9 +572,9 @@ namespace JBooth.VertexPainterPro
          {
             BakeRotation();
          }
+
          EditorGUILayout.Space();
          EditorGUILayout.EndHorizontal();
-
          GUILayout.Space(10);
          GUILayout.Box("Mesh Combiner", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(20)});
          EditorGUILayout.BeginHorizontal();
@@ -639,7 +639,8 @@ namespace JBooth.VertexPainterPro
       // copy a mesh, and bake it's vertex stream into the mesh data. 
       Mesh BakeDownMesh(Mesh mesh, VertexInstanceStream stream)
       {
-         var copy = new Mesh();
+         var copy = Instantiate(mesh);
+         /*
          foreach(var property in typeof(Mesh).GetProperties())
          {
             if(property.GetSetMethod() != null && property.GetGetMethod() != null)
@@ -648,12 +649,13 @@ namespace JBooth.VertexPainterPro
             }
          }
          copy.hideFlags = 0;
+*/
 
          copy.colors = stream.colors;
-         if (stream.uv0 != null) { copy.SetUVs(0, stream.uv0); }
-         if (stream.uv1 != null) { copy.SetUVs(1, stream.uv1); }
-         if (stream.uv2 != null) { copy.SetUVs(2, stream.uv2); }
-         if (stream.uv3 != null) { copy.SetUVs(3, stream.uv3); }
+         if (stream.uv0 != null && stream.uv0.Count > 0) { copy.SetUVs(0, stream.uv0); }
+         if (stream.uv1 != null && stream.uv1.Count > 0) { copy.SetUVs(1, stream.uv1); }
+         if (stream.uv2 != null && stream.uv2.Count > 0) { copy.SetUVs(2, stream.uv2); }
+         if (stream.uv3 != null && stream.uv3.Count > 0) { copy.SetUVs(3, stream.uv3); }
 
          if (stream.positions != null && stream.positions.Length == copy.vertexCount)
          {

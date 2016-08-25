@@ -23,6 +23,7 @@ namespace JBooth.VertexPainterPro
 
       PivotTarget pivotTarget = PivotTarget.UV2;
       bool bakePivotUseLocal = true;
+
       void BakeRotation()
       {
          switch (pivotTarget)

@@ -71,4 +71,8 @@ Shaders
 
 	As you can see, the complexity of the shader can grow very fast as features are enabled. 
 
-	Because these features are compiled out when not in use, what the shader compiler is actually doing is compiling a shader for each option and picking the correct shader. This means that importing the shaders actually produces many thousands of shader variants, which makes import time very, very long. Before shipping, you may want to use Unity’s ShaderVariantCollection feature to remove the shaders your game does not use; this will make your app much smaller, as it will remove unused variants. 
+	Because these features are compiled out when not in use, what the shader compiler is actually doing is compiling a shader for each option and picking the correct shader. This means that importing the shaders actually produces many thousands of shader variants, which makes import time very, very long. Before shipping, you may want to use Unity’s ShaderVariantCollection feature to remove the shaders your game does not use; this will make your app much smaller, as it will remove unused variants.
+
+	Pivot Example:
+
+    The pivot example contains a small tutorial that will show you how to bake the pivot of many objects into the vertices, then combine the object into one object and still rotate them all around their own pivots in the shader. This can be very useful for a number of effects, such as rotating asteroids, objects which shatter into pieces, etc, and is often many times cheaper than animating these effects any other way. 

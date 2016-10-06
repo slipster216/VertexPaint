@@ -201,6 +201,8 @@ namespace JBooth.VertexPainterPro
                }
             }
             job.stream.Apply();
+            EditorUtility.SetDirty(job.stream);
+            EditorUtility.SetDirty(job.stream.gameObject);
             DestroyImmediate(mesh);
             
             brushValue = oldVal;

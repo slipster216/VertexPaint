@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+// base class for custom brushes, see VertexPainterNoiseBrush for an example of how to use..
 namespace JBooth.VertexPainterPro
 {
    public class VertexPainterCustomBrush : ScriptableObject

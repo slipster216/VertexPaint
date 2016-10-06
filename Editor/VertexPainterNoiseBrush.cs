@@ -72,7 +72,10 @@ namespace JBooth.VertexPainterPro
          pos.x *= bd.frequency;
          pos.y *= bd.frequency;
          pos.z *= bd.frequency;
-         float noise = 0.5f * (JBooth.VertexPainterPro.SimplexNoise.Noise.Generate(pos.x, pos.y, pos.z) + 1) * bd.amplitude;
+         float noise = 0.5f * (0.5f * JBooth.VertexPainterPro.SimplexNoise.Noise.Generate(pos.x, pos.y, pos.z) + 0.5f);
+         noise += 0.25f * (0.5f * JBooth.VertexPainterPro.SimplexNoise.Noise.Generate(pos.y * 2.031f, pos.z * 2.031f, pos.x * 2.031f) + 0.5f);
+         noise += 0.25f * (0.5f * JBooth.VertexPainterPro.SimplexNoise.Noise.Generate(pos.z * 4.01f, pos.x * 4.01f, pos.y * 4.01f) + 0.5f);
+         noise *= bd.amplitude;
          // lerp the noise in
          Color c = s.colors[idx];
          c.r = Mathf.Lerp(c.r, noise, r);
@@ -83,6 +86,8 @@ namespace JBooth.VertexPainterPro
       }
 
       // this one is what's actually called by the system, it returns the delegate function above
+      // You want to make the delegate into a proper function, otherwise an anonymous one will allocate
+      // temporary memory..
       public override VertexPainterWindow.Lerper GetLerper()
       {
          return LerpFunc;

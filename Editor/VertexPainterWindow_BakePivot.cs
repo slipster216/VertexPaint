@@ -35,6 +35,8 @@ namespace JBooth.VertexPainterPro
                   {
                      Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localRotation.eulerAngles : job.meshFilter.transform.rotation.eulerAngles;
                      job.stream.SetUV0(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
+                     EditorUtility.SetDirty(job.stream);
+                     EditorUtility.SetDirty(job.stream.gameObject);
                   }
                   break;
                }
@@ -45,6 +47,8 @@ namespace JBooth.VertexPainterPro
                   {
                      Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localRotation.eulerAngles : job.meshFilter.transform.rotation.eulerAngles;
                      job.stream.SetUV1(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
+                     EditorUtility.SetDirty(job.stream);
+                     EditorUtility.SetDirty(job.stream.gameObject);
                   }
                   break;
                }
@@ -55,6 +59,8 @@ namespace JBooth.VertexPainterPro
                   {
                      Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localRotation.eulerAngles : job.meshFilter.transform.rotation.eulerAngles;
                      job.stream.SetUV2(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
+                     EditorUtility.SetDirty(job.stream);
+                     EditorUtility.SetDirty(job.stream.gameObject);
                   }
                   break;
                }
@@ -65,10 +71,13 @@ namespace JBooth.VertexPainterPro
                   {
                      Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localRotation.eulerAngles : job.meshFilter.transform.rotation.eulerAngles;
                      job.stream.SetUV3(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
+                     EditorUtility.SetDirty(job.stream);
+                     EditorUtility.SetDirty(job.stream.gameObject);
                   }
                   break;
                }
          }
+
       }
 
       void BakePivot()
@@ -82,6 +91,8 @@ namespace JBooth.VertexPainterPro
                {
                   Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localPosition : job.meshFilter.transform.position;
                   job.stream.SetUV0(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
+                  EditorUtility.SetDirty(job.stream);
+                  EditorUtility.SetDirty(job.stream.gameObject);
                }
                break;
             }
@@ -92,6 +103,8 @@ namespace JBooth.VertexPainterPro
                {
                   Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localPosition : job.meshFilter.transform.position;
                   job.stream.SetUV1(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
+                  EditorUtility.SetDirty(job.stream);
+                  EditorUtility.SetDirty(job.stream.gameObject);
                }
                break;
             }
@@ -102,6 +115,8 @@ namespace JBooth.VertexPainterPro
                   {
                      Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localPosition : job.meshFilter.transform.position;
                      job.stream.SetUV2(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
+                     EditorUtility.SetDirty(job.stream);
+                     EditorUtility.SetDirty(job.stream.gameObject);
                   }
                   break;
                }
@@ -112,6 +127,8 @@ namespace JBooth.VertexPainterPro
                {
                   Vector3 lp = bakePivotUseLocal ? job.meshFilter.transform.localPosition : job.meshFilter.transform.position;
                   job.stream.SetUV3(new Vector4(lp.x, lp.y, lp.z, UnityEngine.Random.Range(0.0f, 1.0f)), job.verts.Length);
+                  EditorUtility.SetDirty(job.stream);
+                  EditorUtility.SetDirty(job.stream.gameObject);
                }
                break;
             }

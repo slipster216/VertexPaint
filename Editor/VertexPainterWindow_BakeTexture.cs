@@ -78,6 +78,8 @@ namespace JBooth.VertexPainterPro
                   job.stream.SetUV3(Vector4.zero, job.verts.Length);
                }
             }
+            EditorUtility.SetDirty(job.stream);
+            EditorUtility.SetDirty(job.stream.gameObject);
          }
       }
 

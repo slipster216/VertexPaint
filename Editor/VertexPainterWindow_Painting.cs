@@ -1944,7 +1944,12 @@ namespace JBooth.VertexPainterPro
             }
             Profiler.EndSample();
          }
-         //Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+         for (int i = 0; i < jobs.Length; ++i)
+         {
+            PaintJob j = jobs[i];
+            EditorUtility.SetDirty(j.stream);
+            EditorUtility.SetDirty(j.stream.gameObject);
+         }
       }
 
       void CalculateMeshTangents(Mesh mesh)

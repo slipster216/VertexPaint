@@ -18,6 +18,14 @@ https://pledgie.com/campaigns/31113
 
 Warning: This package can take a long time to import into Unity due to a large number of shader variants; if you do not need the shaders and only want the vertex painter, I suggest removing them from the project before importing. They are fantastic shaders though..
 
+A note on the license:
+
+I have been asked by several people if I mind them reselling parts or all of this
+package in the Unity Asset Store. I have amended the license to prohibit this
+use case. I have given this package away for free and put considerable work into
+it, if you find that your product is enhanced by it’s use, then please point your
+users towards my repository. Thanks you.
+
 Additional Vertex Streams
 
 	This package allows you to paint information onto the vertices of a mesh in the Unity editor as well as modify any attribute of the mesh. It uses the new 'additionalVertexStream' system of Unity5, which allows you to override per-instance data on meshes without paying the cost of duplicating a full mesh. This makes it ideal for painting vertex information across many instances of a mesh. The tool also allows you to easily bake that information back to mesh assets if you'd prefer to make a modified mesh and store that in disk, instead of with the instance in the scene. 

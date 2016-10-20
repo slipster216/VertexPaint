@@ -1208,6 +1208,31 @@ namespace JBooth.VertexPainterPro
          }
 
          public bool HasStream() { return _stream != null; }
+         public bool HasData()
+         {
+            if (_stream == null)
+               return false;
+
+            int vertexCount = verts.Length;
+            bool hasColors = (stream.colors != null && stream.colors.Length == vertexCount);
+            bool hasUV0 = (stream.uv0 != null && stream.uv0.Count == vertexCount);
+            bool hasUV1 = (stream.uv1 != null && stream.uv1.Count == vertexCount);
+            bool hasUV2 = (stream.uv2 != null && stream.uv2.Count == vertexCount);
+            bool hasUV3 = (stream.uv3 != null && stream.uv3.Count == vertexCount);
+            bool hasPositions = (stream.positions != null && stream.positions.Length == vertexCount);
+            bool hasNormals = (stream.normals != null && stream.normals.Length == vertexCount);
+
+            return (hasColors || hasUV0 || hasUV1 || hasUV2 || hasUV3 || hasPositions || hasNormals);
+         }
+
+         public void EnforceStream()
+         {
+            if (_stream == null && renderer != null && meshFilter != null)
+            {
+               _stream = meshFilter.gameObject.AddComponent<VertexInstanceStream>();
+            }
+         }
+
          public VertexInstanceStream stream
          {
             get
@@ -1288,6 +1313,21 @@ namespace JBooth.VertexPainterPro
          {
             meshFilter = mf;
             renderer = r;
+            _stream = r.gameObject.GetComponent<VertexInstanceStream>();
+            verts = mf.sharedMesh.vertices;
+            normals = mf.sharedMesh.normals;
+            tangents = mf.sharedMesh.tangents;
+            // optionally defer this unless the brush is set to position..
+            InitMeshConnections();
+         }
+
+         public void CaptureMat()
+         {
+            var r = renderer;
+            if (r == null || stream == null)
+            {
+               return;
+            }
             if (r.sharedMaterials != null && r.sharedMaterials.Length > 1)
             {
                stream.originalMaterial = new Material[r.sharedMaterials.Length];
@@ -1301,20 +1341,17 @@ namespace JBooth.VertexPainterPro
                stream.originalMaterial = new Material[1];
                stream.originalMaterial[0] = r.sharedMaterial;
             }
-            verts = mf.sharedMesh.vertices;
-            normals = mf.sharedMesh.normals;
-            tangents = mf.sharedMesh.tangents;
-            // optionally defer this unless the brush is set to position..
-            InitMeshConnections();
          }
       }
+
+
       
       public void RevertMat()
       {
          // revert old materials
          for (int i = 0; i < jobs.Length; ++i)
          {
-            if (jobs[i].renderer != null)
+            if (jobs[i].renderer != null && jobs[i].HasStream() && jobs[i].stream.originalMaterial != null && jobs[i].stream.originalMaterial.Length > 0)
             {
                var j = jobs[i];
                if (j.renderer.sharedMaterials != null && j.stream.originalMaterial != null &&
@@ -1362,9 +1399,9 @@ namespace JBooth.VertexPainterPro
          UpdateDisplayMode();
       }
 
-      void UpdateDisplayMode()
+      void UpdateDisplayMode(bool endPainting = true)
       {
-         if (painting)
+         if (painting && endPainting)
          {
             EndStroke();
          }
@@ -1378,9 +1415,9 @@ namespace JBooth.VertexPainterPro
             var job = jobs[i];
             EditorUtility.SetSelectedWireframeHidden(job.renderer, hideMeshWireframe);
 
-            if (!showVertexShader)
+            if (!showVertexShader || !enabled)
             {
-               if (job.renderer)
+               if (job.renderer != null && job.HasStream() && job.stream.originalMaterial != null && job.stream.originalMaterial.Length > 0)
                {
                   if (job.renderer.sharedMaterials != null && job.renderer.sharedMaterials.Length > 1 &&
                       job.renderer.sharedMaterials.Length == job.stream.originalMaterial.Length)
@@ -1401,27 +1438,33 @@ namespace JBooth.VertexPainterPro
             }
             else
             {
-               if (job.renderer != null)
+               if (job.renderer != null && job.HasStream())
                {
-                  if (job.renderer.sharedMaterials != null && job.renderer.sharedMaterials.Length > 1)
+                  if (job.renderer.sharedMaterial != VertexInstanceStream.vertexShaderMat)
                   {
-                     Material[] mats = new Material[job.renderer.sharedMaterials.Length];
-                     for (int x = 0; x < job.renderer.sharedMaterials.Length; ++x)
+                     job.CaptureMat();
+                  }
+                  if (job.stream.originalMaterial != null && job.stream.originalMaterial.Length > 0)
+                  {
+                     if (job.renderer.sharedMaterials != null && job.renderer.sharedMaterials.Length > 1)
                      {
-                        mats[x] = VertexInstanceStream.vertexShaderMat;
+                        Material[] mats = new Material[job.renderer.sharedMaterials.Length];
+                        for (int x = 0; x < job.renderer.sharedMaterials.Length; ++x)
+                        {
+                           mats[x] = VertexInstanceStream.vertexShaderMat;
+                        }
+                        job.renderer.sharedMaterials = mats;
                      }
-                     job.renderer.sharedMaterials = mats;
+                     else
+                     {
+                        job.renderer.sharedMaterial = VertexInstanceStream.vertexShaderMat;
+                     }
+                     VertexInstanceStream.vertexShaderMat.SetInt("_flowVisualization", (int)flowVisualization);
+                     VertexInstanceStream.vertexShaderMat.SetInt("_tab", (int)tab);
+                     VertexInstanceStream.vertexShaderMat.SetInt("_flowTarget", (int)flowTarget);
+                     VertexInstanceStream.vertexShaderMat.SetInt("_channel", (int)brushMode);
+                     VertexInstanceStream.vertexShaderMat.SetVector("_uvRange", uvVisualizationRange);
                   }
-                  else
-                  {
-                     job.renderer.sharedMaterial = VertexInstanceStream.vertexShaderMat;
-                  }
-                  VertexInstanceStream.vertexShaderMat.SetInt("_flowVisualization", (int)flowVisualization);
-                  VertexInstanceStream.vertexShaderMat.SetInt("_tab", (int)tab);
-                  VertexInstanceStream.vertexShaderMat.SetInt("_flowTarget", (int)flowTarget);
-                  VertexInstanceStream.vertexShaderMat.SetInt("_channel", (int)brushMode);
-                  VertexInstanceStream.vertexShaderMat.SetVector("_uvRange", uvVisualizationRange);
-
                }
             }
          }
@@ -1641,6 +1684,7 @@ namespace JBooth.VertexPainterPro
          {
             InitPositions(j);
             InitNormalTangent(j);
+            UpdateDisplayMode(false);
             return;
          }
          if (tab == Tab.Flow)
@@ -1675,6 +1719,7 @@ namespace JBooth.VertexPainterPro
                      break;
                   }
             }
+            UpdateDisplayMode(false);
             return;
          }
 
@@ -1760,14 +1805,21 @@ namespace JBooth.VertexPainterPro
                }
 
          }
-
+         UpdateDisplayMode(false);
       }
 
 
       void DrawVertexPoints(PaintJob j, Vector3 point)
       {
          Profiler.BeginSample("Draw Vertex Points");
-         PrepBrushMode(j);
+         if (j.HasStream() && j.HasData())
+         {
+            PrepBrushMode(j);
+         }
+         if (j.renderer == null)
+         {
+            return;
+         }
          // convert point into local space, so we don't have to convert every point
          point = j.renderer.transform.worldToLocalMatrix.MultiplyPoint3x4(point);
          // for some reason this doesn't handle scale, seems like it should
@@ -1947,8 +1999,11 @@ namespace JBooth.VertexPainterPro
          for (int i = 0; i < jobs.Length; ++i)
          {
             PaintJob j = jobs[i];
-            EditorUtility.SetDirty(j.stream);
-            EditorUtility.SetDirty(j.stream.gameObject);
+            if (j.HasStream())
+            {
+               EditorUtility.SetDirty(j.stream);
+               EditorUtility.SetDirty(j.stream.gameObject);
+            }
          }
       }
 
@@ -2172,8 +2227,24 @@ namespace JBooth.VertexPainterPro
          RaycastHit hit;
          float distance = float.MaxValue;
          Vector3 mousePosition = Event.current.mousePosition;
-         mousePosition.y = sceneView.camera.pixelHeight - mousePosition.y;
 
+         float mult = 1;
+         /*
+         // WTF, for some reason, in Unity 5.4.1p3 I need to multiply the mouse coordinated by 2
+         // for them to line up. 
+         // 
+         // And then, this stopped being true after a while.. WTF?
+         //
+         float mult = 2;
+         if (Application.unityVersion.StartsWith("5.3"))
+         {
+            mult = 1;
+         }
+         */
+         
+
+         mousePosition.y = sceneView.camera.pixelHeight - mousePosition.y * mult;
+         mousePosition.x *= mult;
          Vector3 fakeMP = mousePosition;
          fakeMP.z = 20;
          Vector3 point = sceneView.camera.ScreenToWorldPoint(fakeMP);
@@ -2216,10 +2287,10 @@ namespace JBooth.VertexPainterPro
             if (jobs[i].HasStream())
             {
                msh = jobs[i].stream.GetModifierMesh(); 
-               if (msh == null)
-               {
-                  msh = jobs[i].meshFilter.sharedMesh;
-               }
+            }
+            if (msh == null)
+            {
+               msh = jobs[i].meshFilter.sharedMesh;
             }
 
             if (RXLookingGlass.IntersectRayMesh(ray, msh, mtx, out hit))
@@ -2362,6 +2433,7 @@ namespace JBooth.VertexPainterPro
                   jobEdits[i] = true;
                   Undo.RegisterCompleteObjectUndo(jobs[i].stream, "Vertex Painter Stroke");
                }
+
                PaintMesh(jobs[i], point, lerper, value);
                Undo.RecordObject(jobs[i].stream, "Vertex Painter Stroke");
 

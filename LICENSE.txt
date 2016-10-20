@@ -12,7 +12,7 @@ The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
 No portion of the software may be sold or included in packages in the Unity 
-Asset Store.
+Asset Store without express permission from the author.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,

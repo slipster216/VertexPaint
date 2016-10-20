@@ -153,13 +153,33 @@ namespace JBooth.VertexPainterPro
          if (enabled != oldEnabled)
          {
             InitMeshes();
+            UpdateDisplayMode();
          }
          var oldShow = showVertexShader;
+         EditorGUILayout.BeginHorizontal();
          showVertexShader = GUILayout.Toggle(showVertexShader, "Show Vertex Data (ctrl-V)");
          if (oldShow != showVertexShader)
          {
             UpdateDisplayMode();
          }
+         bool emptyStreams = false;
+         for (int i = 0; i < jobs.Length; ++i)
+         {
+            if (!jobs[i].HasStream())
+               emptyStreams = true;
+         }
+         if (emptyStreams)
+         {
+            if (GUILayout.Button("Add Streams"))
+            {
+               for (int i = 0; i < jobs.Length; ++i)
+               {
+                  jobs[i].EnforceStream();
+               }
+               UpdateDisplayMode();
+            }
+         }
+         EditorGUILayout.EndHorizontal();
 
          brushVisualization = (BrushVisualization)EditorGUILayout.EnumPopup("Brush Visualization", brushVisualization);
 
@@ -184,14 +204,14 @@ namespace JBooth.VertexPainterPro
          bool hasUV3 = false;
          bool hasPositions = false;
          bool hasNormals = false;
-         
+         bool hasStream = false;
          for (int i = 0; i < jobs.Length; ++i)
          {
             var stream = jobs[i]._stream;
             if (stream != null)
             {
                int vertexCount = jobs[i].verts.Length;
-               
+               hasStream = true;
                hasColors = (stream.colors != null && stream.colors.Length == vertexCount);
                hasUV0 = (stream.uv0 != null && stream.uv0.Count == vertexCount);
                hasUV1 = (stream.uv1 != null && stream.uv1.Count == vertexCount);
@@ -201,90 +221,109 @@ namespace JBooth.VertexPainterPro
                hasNormals = (stream.normals != null && stream.normals.Length == vertexCount);
             }
          }
-         
-         EditorGUILayout.BeginHorizontal();
-         EditorGUILayout.PrefixLabel("Clear Channel:");
-         if (hasColors && DrawClearButton("Colors"))
+
+         if (hasStream && (hasColors || hasUV0 || hasUV1 || hasUV2 || hasUV3 || hasPositions || hasNormals))
          {
-            for (int i = 0; i < jobs.Length; ++i)
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PrefixLabel("Clear Channel:");
+            if (hasColors && DrawClearButton("Colors"))
             {
-               Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
-               var stream = jobs[i].stream;
-               stream.colors = null;
-               stream.Apply();
+               for (int i = 0; i < jobs.Length; ++i)
+               {
+                  Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
+                  var stream = jobs[i].stream;
+                  stream.colors = null;
+                  stream.Apply();
+               }
+               Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
             }
-            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+            if (hasUV0 && DrawClearButton("UV0"))
+            {
+               for (int i = 0; i < jobs.Length; ++i)
+               {
+                  Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
+                  var stream = jobs[i].stream;
+                  stream.uv0 = null;
+                  stream.Apply();
+               }
+               Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+            }
+            if (hasUV1 && DrawClearButton("UV1"))
+            {
+               for (int i = 0; i < jobs.Length; ++i)
+               {
+                  Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
+                  var stream = jobs[i].stream;
+                  stream.uv1 = null;
+                  stream.Apply();
+               }
+               Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+            }
+            if (hasUV2 && DrawClearButton("UV2"))
+            {
+               for (int i = 0; i < jobs.Length; ++i)
+               {
+                  Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
+                  var stream = jobs[i].stream;
+                  stream.uv2 = null;
+                  stream.Apply();
+               }
+               Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+            }
+            if (hasUV3 && DrawClearButton("UV3"))
+            {
+               for (int i = 0; i < jobs.Length; ++i)
+               {
+                  Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
+                  var stream = jobs[i].stream;
+                  stream.uv3 = null;
+                  stream.Apply();
+               }
+               Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+            }
+            if (hasPositions && DrawClearButton("Pos"))
+            {
+               for (int i = 0; i < jobs.Length; ++i)
+               {
+                  Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
+                  jobs[i].stream.positions = null;
+                  Mesh m = jobs[i].stream.GetModifierMesh();
+                  if (m != null)
+                     m.vertices = jobs[i].meshFilter.sharedMesh.vertices;
+                  jobs[i].stream.Apply();
+               }
+               Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+            }
+            if (hasNormals && DrawClearButton("Norm"))
+            {
+               for (int i = 0; i < jobs.Length; ++i)
+               {
+                  Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
+                  jobs[i].stream.normals = null;
+                  jobs[i].stream.tangents = null;
+                  jobs[i].stream.Apply();
+               }
+               Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+            }
+
+            EditorGUILayout.EndHorizontal();
          }
-         if (hasUV0 && DrawClearButton("UV0"))
+         else if (hasStream)
          {
-            for (int i = 0; i < jobs.Length; ++i)
+            if (GUILayout.Button("Remove Unused Stream Components"))
             {
-               Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
-               var stream = jobs[i].stream;
-               stream.uv0 = null;
-               stream.Apply();
+               RevertMat();
+               for (int i = 0; i < jobs.Length; ++i)
+               {
+                  if (jobs[i].HasStream())
+                  {
+                     DestroyImmediate(jobs[i].stream);
+                  }
+               }
+               UpdateDisplayMode();
             }
-            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
          }
-         if (hasUV1 && DrawClearButton("UV1"))
-         {
-            for (int i = 0; i < jobs.Length; ++i)
-            {
-               Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
-               var stream = jobs[i].stream;
-               stream.uv1 = null;
-               stream.Apply();
-            }
-            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
-         }
-         if (hasUV2 && DrawClearButton("UV2"))
-         {
-            for (int i = 0; i < jobs.Length; ++i)
-            {
-               Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
-               var stream = jobs[i].stream;
-               stream.uv2 = null;
-               stream.Apply();
-            }
-            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
-         }
-         if (hasUV3 && DrawClearButton("UV3"))
-         {
-            for (int i = 0; i < jobs.Length; ++i)
-            {
-               Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
-               var stream = jobs[i].stream;
-               stream.uv3 = null;
-               stream.Apply();
-            }
-            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
-         }
-         if (hasPositions && DrawClearButton("Pos"))
-         {
-            for (int i = 0; i < jobs.Length; ++i)
-            {
-               Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
-               jobs[i].stream.positions = null;
-               Mesh m = jobs[i].stream.GetModifierMesh();
-               if (m != null)
-                  m.vertices = jobs[i].meshFilter.sharedMesh.vertices;
-               jobs[i].stream.Apply();
-            }
-            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
-         }
-         if (hasNormals && DrawClearButton("Norm"))
-         {
-            for (int i = 0; i < jobs.Length; ++i)
-            {
-               Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
-               jobs[i].stream.normals = null;
-               jobs[i].stream.tangents = null;
-               jobs[i].stream.Apply();
-            }
-            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
-         }
-         
-         EditorGUILayout.EndHorizontal();
+
 
          EditorGUILayout.Separator();
          GUILayout.Box("", new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(1)});

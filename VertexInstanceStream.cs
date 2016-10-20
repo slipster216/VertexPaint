@@ -73,15 +73,14 @@ namespace JBooth.VertexPainterPro
       public Material[]       originalMaterial;
       public static Material  vertexShaderMat;
 
-   #endif
-   	void Start()
+
+      void Awake()
       {
          // restore original material if we got saved with the preview material. 
          // I tried to do this in a number of ways; using the pre/post serialization callbacks seemed
          // like the best, but is actually not possible because they don't always both get called. In editor,
          // sometimes only the pre-serialization callback gets called. WTF..
 
-   #if UNITY_EDITOR
          MeshRenderer mr = GetComponent<MeshRenderer>();
          if (mr != null)
          {
@@ -95,12 +94,17 @@ namespace JBooth.VertexPainterPro
                }
                mr.sharedMaterials = mats;
             }
-            else if (originalMaterial.Length > 0)
+            else if (originalMaterial != null && originalMaterial.Length > 0)
             {
                mr.sharedMaterial = originalMaterial[0];
             }
          }
-   #endif
+      }
+      #endif
+
+   	void Start()
+      {
+         
          Apply(true);
       }
 

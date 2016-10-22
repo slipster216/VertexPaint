@@ -24,7 +24,7 @@ I have been asked by several people if I mind them reselling parts or all of thi
 package in the Unity Asset Store. I have amended the license to prohibit this
 use case. I have given this package away for free and put considerable work into
 it, if you find that your product is enhanced by it’s use, then please point your
-users towards my repository. Thanks you.
+users towards my repository. Thank you.
 
 Additional Vertex Streams
 

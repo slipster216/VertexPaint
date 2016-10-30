@@ -57,7 +57,7 @@ namespace JBooth.VertexPainterPro
       // which contains important cached information to make painting fast, and hold the actual stream data. 
       // the index is the index into the vertex array, the val is the brush data we supplied in GetBrushObject,
       // and r is a 0 to 1 with how far to tween the value towards the brush (brush pressure * deltatime)
-      void LerpFunc(VertexPainterWindow.PaintJob j, int idx, ref object val, float r)
+      void LerpFunc(PaintJob j, int idx, ref object val, float r)
       {
          // retrieve our brush data and get the stream we're painting into
          BrushData bd = val as BrushData;

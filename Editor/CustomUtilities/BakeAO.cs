@@ -1,13 +1,42 @@
-﻿
-using UnityEditor;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 
 namespace JBooth.VertexPainterPro
 {
-   public partial class VertexPainterWindow : EditorWindow 
+   [System.Serializable]
+   public class BakeAO : IVertexPainterUtility
    {
+      public string GetName() 
+      {
+         return "Ambient Occlusion";
+      }
+
+      public void OnGUI(PaintJob[] jobs)
+      {
+         var window = VertexPainterWindow.GetWindow<VertexPainterWindow>();
+         window.brushMode = (VertexPainterWindow.BrushTarget)EditorGUILayout.EnumPopup("Target Channel", window.brushMode);
+         aoSamples = EditorGUILayout.IntSlider("Samples", aoSamples, 64, 1024);
+         EditorGUILayout.BeginHorizontal();
+         aoRange = EditorGUILayout.Vector2Field("Range (Min, Max)", aoRange);
+         aoRange.x = Mathf.Max(aoRange.x, 0.0001f);
+         EditorGUILayout.EndHorizontal();
+         aoIntensity = EditorGUILayout.Slider("Intensity", aoIntensity, 0.25f, 4.0f);
+         bakeLighting = EditorGUILayout.Toggle("Bake Lighting", bakeLighting);
+         if (bakeLighting)
+         {
+            aoLightAmbient = EditorGUILayout.ColorField("Light Ambient", aoLightAmbient);
+         }
+         aoBakeMode = (AOBakeMode)EditorGUILayout.EnumPopup("Mode", aoBakeMode);
+
+         EditorGUILayout.Space();
+         if (GUILayout.Button("Bake"))
+         {
+            DoBakeAO(jobs, window);
+         }
+      }
+
       public int     aoSamples = 512;
       public Vector2 aoRange = new Vector2(0.0001f, 1.5f);
       public float   aoIntensity = 2.0f;
@@ -23,7 +52,7 @@ namespace JBooth.VertexPainterPro
 
 
       RaycastHit hit = new RaycastHit();
-     
+
       void ApplyAOLight(ref Color c, Light l, Vector3 pos, Vector3 n)
       {
          if (!l.isActiveAndEnabled)
@@ -43,15 +72,15 @@ namespace JBooth.VertexPainterPro
          {
             return;
          }
-         
+
          intensity *= Mathf.Clamp01(Vector3.Dot(n, dir));
-        
+
          c.r += l.color.r * intensity;
          c.g += l.color.g * intensity;
          c.b += l.color.b * intensity;
       }
 
-      void BakeAO()
+      void DoBakeAO(PaintJob[] jobs, VertexPainterWindow window)
       {
          Light[] aoLights = null;
          if (bakeLighting)
@@ -66,9 +95,9 @@ namespace JBooth.VertexPainterPro
          }
          int numSamples = numVerts * aoSamples;
 
-         float oldFloat = floatBrushValue;
-         Color oldColor = brushColor;
-         int oldVal = brushValue;
+         float oldFloat = window.floatBrushValue;
+         Color oldColor = window.brushColor;
+         int oldVal = window.brushValue;
 
          // add temp colliders if needed
          bool[] tempCollider = new bool[jobs.Length];
@@ -82,15 +111,15 @@ namespace JBooth.VertexPainterPro
                tempCollider[jIdx] = true;
             }
          }
-        
+
          // do AO
          for (int jIdx = 0; jIdx < jobs.Length; ++jIdx)
          {
             PaintJob job = jobs[jIdx];
 
-            PrepBrushMode(job);
+            window.PrepBrushMode(job);
             // bake down the mesh so we take instance positions into account..
-            Mesh mesh = BakeDownMesh(job.meshFilter.sharedMesh, job.stream);
+            Mesh mesh = VertexPainterUtilities.BakeDownMesh(job.meshFilter.sharedMesh, job.stream);
             Vector3[] verts = mesh.vertices;
             if (mesh.normals == null || mesh.normals.Length == 0)
             {
@@ -98,16 +127,16 @@ namespace JBooth.VertexPainterPro
             }
             Vector3[] normals = mesh.normals;
 
-            brushValue = 255;
-            floatBrushValue = 1.0f;
-            brushColor = Color.white;
-            var val = GetBrushValue();
-            Lerper lerper = null;
-            Multiplier mult = null;
+            window.brushValue = 255;
+            window.floatBrushValue = 1.0f;
+            window.brushColor = Color.white;
+            var val = window.GetBrushValue();
+            VertexPainterWindow.Lerper lerper = null;
+            VertexPainterWindow.Multiplier mult = null;
 
             if (aoBakeMode == AOBakeMode.Replace)
             {
-               lerper = GetLerper();
+               lerper = window.GetLerper();
                for (int i = 0; i < job.verts.Length; ++i)
                {
                   lerper.Invoke(job, i, ref val, 1);
@@ -115,7 +144,7 @@ namespace JBooth.VertexPainterPro
             }
             else
             {
-               mult = GetMultiplier();
+               mult = window.GetMultiplier();
             }
 
             for (int i = 0; i<verts.Length; i++) 
@@ -174,23 +203,23 @@ namespace JBooth.VertexPainterPro
                   c.g *= totalOcclusion;
                   c.b *= totalOcclusion;
                   c.a = totalOcclusion;
-                  brushColor = c;
+                  window.brushColor = c;
 
                   // if we're lit and targeting a channel other than color, bake max intensity..
-                  floatBrushValue = Mathf.Max(Mathf.Max(c.r, c.g), c.b) * totalOcclusion;
-                  brushValue = (int)(floatBrushValue * 255);
+                  window.floatBrushValue = Mathf.Max(Mathf.Max(c.r, c.g), c.b) * totalOcclusion;
+                  window.brushValue = (int)(window.floatBrushValue * 255);
                }
                else
                {
-                  brushColor.r = totalOcclusion;
-                  brushColor.g = totalOcclusion;
-                  brushColor.b = totalOcclusion;
-                  brushColor.a = totalOcclusion;
+                  window.brushColor.r = totalOcclusion;
+                  window.brushColor.g = totalOcclusion;
+                  window.brushColor.b = totalOcclusion;
+                  window.brushColor.a = totalOcclusion;
 
-                  floatBrushValue = totalOcclusion;
-                  brushValue = (int)(totalOcclusion * 255);
+                  window.floatBrushValue = totalOcclusion;
+                  window.brushValue = (int)(totalOcclusion * 255);
                }
-               val = GetBrushValue();
+               val = window.GetBrushValue();
                if (aoBakeMode == AOBakeMode.Replace)
                {
                   lerper.Invoke(job, i, ref val, 1);
@@ -203,11 +232,11 @@ namespace JBooth.VertexPainterPro
             job.stream.Apply();
             EditorUtility.SetDirty(job.stream);
             EditorUtility.SetDirty(job.stream.gameObject);
-            DestroyImmediate(mesh);
-            
-            brushValue = oldVal;
-            floatBrushValue = oldFloat;
-            brushColor = oldColor;
+            GameObject.DestroyImmediate(mesh);
+
+            window.brushValue = oldVal;
+            window.floatBrushValue = oldFloat;
+            window.brushColor = oldColor;
          }
          // remove temp colliders
          for (int jIdx = 0; jIdx < jobs.Length; ++jIdx)
@@ -217,15 +246,14 @@ namespace JBooth.VertexPainterPro
                Collider c = jobs[jIdx].meshFilter.GetComponent<Collider>();
                if (c != null)
                {
-                  DestroyImmediate(c);
+                  GameObject.DestroyImmediate(c);
                }
             }
          }
-         
+
          EditorUtility.ClearProgressBar();
          SceneView.RepaintAll();
-         
+
       }
    }
-
 }

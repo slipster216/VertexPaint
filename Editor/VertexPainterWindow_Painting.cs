@@ -1251,7 +1251,8 @@ namespace JBooth.VertexPainterPro
                if (!showVertexShader || !enabled)
                {
                   // restore..
-                  if (job.stream.originalMaterial != null && job.stream.originalMaterial.Length > 0)
+                  if (job.stream.originalMaterial != null && job.stream.originalMaterial.Length > 0 &&
+                      job.renderer.sharedMaterial == VertexInstanceStream.vertexShaderMat)
                   {
                      if (job.renderer.sharedMaterials != null && job.renderer.sharedMaterials.Length > 1 &&
                          job.renderer.sharedMaterials.Length == job.stream.originalMaterial.Length)
@@ -1268,6 +1269,10 @@ namespace JBooth.VertexPainterPro
                      {
                         job.renderer.sharedMaterial = job.stream.originalMaterial[0];
                      }
+                  }
+                  else if (job.renderer.sharedMaterial != VertexInstanceStream.vertexShaderMat)
+                  {
+                     job.CaptureMat();
                   }
                }
                else if (showVertexShader)

@@ -1170,6 +1170,7 @@ namespace JBooth.VertexPainterPro
          Disk
       }
       public BrushVisualization brushVisualization = BrushVisualization.Sphere;
+      public bool multMouse2X = false;
       public PaintJob[]      jobs = new PaintJob[0];
       // bool used to know if we've registered an undo with this object or not
       public bool[] jobEdits = new bool[0];
@@ -2065,20 +2066,9 @@ namespace JBooth.VertexPainterPro
          float distance = float.MaxValue;
          Vector3 mousePosition = Event.current.mousePosition;
 
-         //float mult = 1;
+         // I hate this; hopefully I'll hear something about what is causing this from Unity..
+         float mult = this.multMouse2X ? 2 : 1;
 
-         // WTF, for some reason, in Unity 5.4.1p3 I need to multiply the mouse coordinated by 2
-         // for them to line up. 
-         // 
-         // Only seems to happen in OSX
-         #if UNITY_EDITOR_OSX
-         float mult = 2;
-         if (Application.unityVersion.StartsWith("5.3"))
-         {
-            mult = 1;
-         }
-         #endif
-         
 
          mousePosition.y = sceneView.camera.pixelHeight - mousePosition.y * mult;
          mousePosition.x *= mult;

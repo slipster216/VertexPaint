@@ -7,7 +7,6 @@ namespace JBooth.VertexPainterPro
 {
    public class VertexPainterUtilities 
    {
-
       public static GameObject MergeMeshes(PaintJob[] jobs)
       {
          if (jobs.Length == 0)

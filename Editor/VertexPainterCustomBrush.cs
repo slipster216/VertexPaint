@@ -6,7 +6,7 @@ namespace JBooth.VertexPainterPro
 {
    public class VertexPainterCustomBrush : ScriptableObject
    {
-
+      #if UNITY_EDITOR
       public enum Channels
       {
          Colors = 1,
@@ -46,5 +46,6 @@ namespace JBooth.VertexPainterPro
       public virtual void DrawGUI()
       {
       }
+      #endif
    }
 }

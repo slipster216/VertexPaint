@@ -215,8 +215,7 @@ namespace JBooth.VertexPainterPro
                   EditorUtility.SetSelectedWireframeHidden(jobs[i].renderer, hideMeshWireframe);
                }
             }
-
-            multMouse2X = GUILayout.Toggle(multMouse2X, "2X mouse position");
+               
             bool hasColors = false;
             bool hasUV0 = false;
             bool hasUV1 = false;

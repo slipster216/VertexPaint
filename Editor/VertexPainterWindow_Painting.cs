@@ -1170,7 +1170,6 @@ namespace JBooth.VertexPainterPro
          Disk
       }
       public BrushVisualization brushVisualization = BrushVisualization.Sphere;
-      public bool multMouse2X = false;
       public PaintJob[]      jobs = new PaintJob[0];
       // bool used to know if we've registered an undo with this object or not
       public bool[] jobEdits = new bool[0];
@@ -2066,9 +2065,13 @@ namespace JBooth.VertexPainterPro
          float distance = float.MaxValue;
          Vector3 mousePosition = Event.current.mousePosition;
 
-         // I hate this; hopefully I'll hear something about what is causing this from Unity..
-         float mult = this.multMouse2X ? 2 : 1;
-
+         // So, in 5.4, Unity added this value, which is basically a scale to mouse coordinates for retna monitors.
+         // Not all monitors, just some of them.
+         // What I don't get is why the fuck they don't just pass me the correct fucking value instead. I spent hours
+         // finding this, and even the paid Unity support my company pays many thousands of dollars for had no idea
+         // after several weeks of back and forth. If your going to fake the coordinates for some reason, please do
+         // it everywhere to not just randomly break things everywhere you don't multiply some new value in. 
+         float mult = EditorGUIUtility.pixelsPerPoint;
 
          mousePosition.y = sceneView.camera.pixelHeight - mousePosition.y * mult;
          mousePosition.x *= mult;

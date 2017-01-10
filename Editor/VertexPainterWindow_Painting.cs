@@ -2128,8 +2128,11 @@ namespace JBooth.VertexPainterPro
          // finding this, and even the paid Unity support my company pays many thousands of dollars for had no idea
          // after several weeks of back and forth. If your going to fake the coordinates for some reason, please do
          // it everywhere to not just randomly break things everywhere you don't multiply some new value in. 
+         #if UNITY_5_3
+         float mult = 1;
+         #else
          float mult = EditorGUIUtility.pixelsPerPoint;
-
+         #endif
          mousePosition.y = sceneView.camera.pixelHeight - mousePosition.y * mult;
          mousePosition.x *= mult;
          Vector3 fakeMP = mousePosition;

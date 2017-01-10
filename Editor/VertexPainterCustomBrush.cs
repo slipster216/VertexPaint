@@ -42,6 +42,12 @@ namespace JBooth.VertexPainterPro
          return null;
       }
 
+      // called before we start applying stroke data for a given frame via brush
+      // not necissarily called by utilities..
+      public virtual void BeginApplyStroke(Ray ray)
+      {
+      }
+
       // function in case you'd like to draw some custom gui for your brush
       public virtual void DrawGUI()
       {

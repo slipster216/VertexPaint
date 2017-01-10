@@ -68,9 +68,11 @@ namespace JBooth.VertexPainterPro
 
       ColorSwatches swatches = null;
 
-
+      #if __MEGASPLAT__
+      Tab tab = Tab.Custom;
+      #else
       Tab tab = Tab.Paint;
-
+      #endif
       bool hideMeshWireframe = false;
       
       bool DrawClearButton(string label)
@@ -82,22 +84,34 @@ namespace JBooth.VertexPainterPro
          return false;
       }
 
-
       static Dictionary<string, bool> rolloutStates = new Dictionary<string, bool>();
-      bool DrawRollup(string text, bool defaultState = true)
+      static GUIStyle rolloutStyle;
+      public static bool DrawRollup(string text, bool defaultState = true, bool inset = false)
       {
-         GUI.skin.box.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
-         var skin = GUI.skin.button;
-         GUI.skin.button = GUI.skin.box;
+         if (rolloutStyle == null)
+         {
+            rolloutStyle = GUI.skin.box;
+            rolloutStyle.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+         }
+         if (inset == true)
+         {
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.GetControlRect(GUILayout.Width(40));
+         }
+
          if (!rolloutStates.ContainsKey(text))
          {
             rolloutStates[text] = defaultState;
          }
-         if (GUILayout.Button(text, new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(20)}))
+         if (GUILayout.Button(text, rolloutStyle, new GUILayoutOption[]{GUILayout.ExpandWidth(true), GUILayout.Height(20)}))
          {
             rolloutStates[text] = !rolloutStates[text];
          }
-         GUI.skin.button = skin;
+         if (inset == true)
+         {
+            EditorGUILayout.GetControlRect(GUILayout.Width(40));
+            EditorGUILayout.EndHorizontal();
+         }
          return rolloutStates[text];
       }
 
@@ -133,21 +147,25 @@ namespace JBooth.VertexPainterPro
          {
             UpdateDisplayMode();
          }
-         scroll = EditorGUILayout.BeginScrollView(scroll);
+
          if (tab == Tab.Paint)
          {
+            scroll = EditorGUILayout.BeginScrollView(scroll);
             DrawPaintGUI();
          }
          else if (tab == Tab.Deform)
          {
+            scroll = EditorGUILayout.BeginScrollView(scroll);
             DrawDeformGUI();
          }
          else if (tab == Tab.Flow)
          {
+            scroll = EditorGUILayout.BeginScrollView(scroll);
             DrawFlowGUI();
          }
          else if (tab == Tab.Utility)
          {
+            scroll = EditorGUILayout.BeginScrollView(scroll);
             DrawUtilityGUI();
          }
          else if (tab == Tab.Custom)
@@ -165,10 +183,6 @@ namespace JBooth.VertexPainterPro
          if (DrawRollup("Vertex Painter"))
          {
             bool oldEnabled = enabled;
-            if (Event.current.isKey && Event.current.keyCode == KeyCode.Escape && Event.current.type == EventType.KeyUp)
-            {
-               enabled = !enabled;
-            }
             enabled = GUILayout.Toggle(enabled, "Active (ESC)");
             if (enabled != oldEnabled)
             {
@@ -178,6 +192,8 @@ namespace JBooth.VertexPainterPro
             var oldShow = showVertexShader;
             EditorGUILayout.BeginHorizontal();
             showVertexShader = GUILayout.Toggle(showVertexShader, "Show Vertex Data (ctrl-V)");
+            showNormals = GUILayout.Toggle(showNormals, "Normals");
+            showTangents = GUILayout.Toggle(showTangents, "Tangents");
             if (oldShow != showVertexShader)
             {
                UpdateDisplayMode();
@@ -188,6 +204,7 @@ namespace JBooth.VertexPainterPro
                if (!jobs[i].HasStream())
                   emptyStreams = true;
             }
+            EditorGUILayout.EndHorizontal();
             if (emptyStreams)
             {
                if (GUILayout.Button("Add Streams"))
@@ -199,12 +216,14 @@ namespace JBooth.VertexPainterPro
                   UpdateDisplayMode();
                }
             }
-            EditorGUILayout.EndHorizontal();
+
 
             brushVisualization = (BrushVisualization)EditorGUILayout.EnumPopup("Brush Visualization", brushVisualization);
-
+            EditorGUILayout.BeginHorizontal();
             showVertexPoints = GUILayout.Toggle(showVertexPoints, "Show Brush Influence");
-
+            showVertexSize = EditorGUILayout.Slider("   Size", showVertexSize, 0.2f, 10);
+            showVertexColor = EditorGUILayout.ColorField(showVertexColor, GUILayout.Width(40));
+            EditorGUILayout.EndHorizontal();
             bool oldHideMeshWireframe = hideMeshWireframe;
             hideMeshWireframe = !GUILayout.Toggle(!hideMeshWireframe, "Show Wireframe (ctrl-W)");
 
@@ -212,7 +231,7 @@ namespace JBooth.VertexPainterPro
             {
                for (int i = 0; i < jobs.Length; ++i)
                {
-                  EditorUtility.SetSelectedWireframeHidden(jobs[i].renderer, hideMeshWireframe);
+                  SetWireframeDisplay(jobs[i].renderer, hideMeshWireframe);
                }
             }
                
@@ -355,6 +374,7 @@ namespace JBooth.VertexPainterPro
          brushSize      = EditorGUILayout.Slider("Brush Size", brushSize, 0.01f, 30.0f);
          brushFlow      = EditorGUILayout.Slider("Brush Flow", brushFlow, 0.1f, 128.0f);
          brushFalloff   = EditorGUILayout.Slider("Brush Falloff", brushFalloff, 0.1f, 4.0f);
+
          if (tab == Tab.Paint && flowTarget != FlowTarget.ColorBA && flowTarget != FlowTarget.ColorRG)
          {
             flowRemap01 = EditorGUILayout.Toggle("use 0->1 mapping", flowRemap01);
@@ -374,7 +394,7 @@ namespace JBooth.VertexPainterPro
 
             DrawBrushSettingsGUI();
          }
-
+         scroll = EditorGUILayout.BeginScrollView(scroll);
          EditorGUILayout.BeginHorizontal();
          if (GUILayout.Button("Fill"))
          {

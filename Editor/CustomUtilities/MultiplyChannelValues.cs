@@ -5,7 +5,7 @@ using UnityEditor;
 
 namespace JBooth.VertexPainterPro
 {
-   public class MultiplyChannelVaues : IVertexPainterUtility 
+   public class MultiplyChannelValues : IVertexPainterUtility 
    {
       public string GetName()
       {

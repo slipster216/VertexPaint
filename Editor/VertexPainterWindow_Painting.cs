@@ -1162,6 +1162,11 @@ namespace JBooth.VertexPainterPro
       public VertexContraint vertexContraint = VertexContraint.Normal;
       public bool            showVertexShader = false;
       public bool            showVertexPoints = false;
+      public float           showVertexSize = 1;
+      public Color           showVertexColor = Color.white;
+      public bool            showNormals = false;
+      public bool            showTangents = false;
+
       public VertexPainterCustomBrush customBrush;
 
       public enum BrushVisualization
@@ -1174,10 +1179,6 @@ namespace JBooth.VertexPainterPro
       // bool used to know if we've registered an undo with this object or not
       public bool[] jobEdits = new bool[0];
 
-
-
-
-      
       public void RevertMat()
       {
          // revert old materials
@@ -1202,7 +1203,7 @@ namespace JBooth.VertexPainterPro
                   jobs[i].renderer.sharedMaterial = jobs[i].stream.originalMaterial[0];
                }
             }
-            EditorUtility.SetSelectedWireframeHidden(jobs[i].renderer, true);
+            SetWireframeDisplay(jobs[i].renderer, true);
          }
       }
 
@@ -1231,6 +1232,16 @@ namespace JBooth.VertexPainterPro
          UpdateDisplayMode();
       }
 
+      void SetWireframeDisplay(Renderer r, bool hidden)
+      {
+         #if UNITY_5_5_OR_NEWER
+         EditorUtility.SetSelectedRenderState(r, hidden ? 
+         EditorSelectedRenderState.Hidden : EditorSelectedRenderState.Wireframe);
+         #else
+         EditorUtility.SetSelectedWireframeHidden(r, hidden);
+         #endif
+      }
+
       void UpdateDisplayMode(bool endPainting = true)
       {
          if (painting && endPainting)
@@ -1245,7 +1256,7 @@ namespace JBooth.VertexPainterPro
          for (int i = 0; i < jobs.Length; ++i)
          {
             var job = jobs[i];
-            EditorUtility.SetSelectedWireframeHidden(job.renderer, hideMeshWireframe);
+            SetWireframeDisplay(job.renderer, hideMeshWireframe);
             if (job.renderer != null && job.HasStream())
             {
                if (!showVertexShader || !enabled)
@@ -1648,7 +1659,6 @@ namespace JBooth.VertexPainterPro
 
       void DrawVertexPoints(PaintJob j, Vector3 point)
       {
-         Profiler.BeginSample("Draw Vertex Points");
          if (j.HasStream() && j.HasData())
          {
             PrepBrushMode(j);
@@ -1670,12 +1680,11 @@ namespace JBooth.VertexPainterPro
             float d = Vector3.Distance(point, j.verts[i]);
             if (d < bz)
             {
-               Handles.color = Color.white;
+               Handles.color = showVertexColor;
                Vector3 wp = j.meshFilter.transform.localToWorldMatrix.MultiplyPoint(j.verts[i]);
-               Handles.SphereCap(0, wp, Quaternion.identity, HandleUtility.GetHandleSize(wp) * 0.02f);
+               Handles.SphereCap(0, wp, Quaternion.identity, HandleUtility.GetHandleSize(wp) * 0.02f * showVertexSize);
             }
          }
-         Profiler.EndSample();
       }
 
 
@@ -1803,7 +1812,10 @@ namespace JBooth.VertexPainterPro
          // could possibly make this faster by avoiding the double apply..
          if (tab == Tab.Deform)
          {
-            Profiler.BeginSample("Recalculate Normals and Tangents");
+            // This used to recalculate the normals, but this introduced tearing, since non-shared overlapping vertices
+            // would get slightly different normals with each stroke and slowly tear the mesh appart. For now, disable,
+            // until I have time to re-enable with some fast-spacial hash over the mesh..
+            /* 
             for (int i = 0; i < jobs.Length; ++i)
             {
                PaintJob j = jobs[i];
@@ -1811,27 +1823,19 @@ namespace JBooth.VertexPainterPro
                {
                   Mesh m = j.stream.Apply(false);
                   m.triangles = j.meshFilter.sharedMesh.triangles;
-
-                  m.RecalculateNormals();
-                  if (j.stream.normals == null)
-                  {
-                     j.stream.normals = new Vector3[m.vertexCount];
-                  }
-                  m.normals.CopyTo(j.stream.normals, 0);
-
+                  m.normals = j.stream.normals;
+                  m.tangents = j.stream.tangents;
                   m.uv = j.meshFilter.sharedMesh.uv;
+                  m.RecalculateNormals();
                   CalculateMeshTangents(m);
-                  if (j.stream.tangents == null)
-                  {
-                     j.stream.tangents = new Vector4[m.vertexCount];
-                  }
-                  m.tangents.CopyTo(j.stream.tangents, 0);
-
+                  j.stream.normals = m.normals;
+                  j.stream.tangents = m.tangents;
                   m.RecalculateBounds();
+
                   j.stream.Apply();
                }
             }
-            Profiler.EndSample();
+            */
          }
          for (int i = 0; i < jobs.Length; ++i)
          {
@@ -1951,7 +1955,7 @@ namespace JBooth.VertexPainterPro
                      case VertexContraint.Normal:
                         {
                            Vector3 cur = j.stream.positions[i];
-                           Vector3 dir = j.stream.normals[i].normalized;
+                           Vector3 dir = j.stream.normals[i];
                            dir *= strength;
                            cur += pull ? dir : -dir;
                            j.stream.positions[i] = cur;
@@ -2036,8 +2040,61 @@ namespace JBooth.VertexPainterPro
       Vector3 oldMousePosition;
       Vector3 strokeDir = Vector3.zero;
 
+      void DoShortcuts()
+      {
+         // wish I could make this global! but can't find a way...
+         if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
+         {
+            enabled = !enabled;
+            if (enabled)
+            {
+               InitMeshes();
+               UpdateDisplayMode();
+               Event.current.Use();
+            }
+         }
+   
+         // brush adjustments
+         const float adjustSpeed = 0.3f;
+         if (Event.current.isKey && Event.current.type == EventType.KeyDown)
+         {
+            if (Event.current.keyCode == KeyCode.LeftBracket)
+            {
+               brushSize -= adjustSpeed;
+               Repaint();
+            }
+            else if (Event.current.keyCode == KeyCode.RightBracket)
+            {
+               brushSize += adjustSpeed;
+               Repaint();
+            }
+            else if (Event.current.keyCode == KeyCode.Semicolon)
+            {
+               brushFlow -= adjustSpeed;
+               Repaint();
+            }
+            else if (Event.current.keyCode == KeyCode.Quote)
+            {
+               brushFlow += adjustSpeed;
+               Repaint();
+            }
+            else if (Event.current.keyCode == KeyCode.Period)
+            {
+               brushFalloff -= adjustSpeed;
+               Repaint();
+            }
+            else if (Event.current.keyCode == KeyCode.Slash)
+            {
+               brushFlow += adjustSpeed;
+               Repaint();
+            }
+         }
+      }
+
       void OnSceneGUI(SceneView sceneView)
       {
+         DoShortcuts();
+
          deltaTime = EditorApplication.timeSinceStartup - lastTime;
          lastTime = EditorApplication.timeSinceStartup;
 
@@ -2108,7 +2165,7 @@ namespace JBooth.VertexPainterPro
             }
             if (toggleWireframe)
             {
-               EditorUtility.SetSelectedWireframeHidden(jobs[i].renderer, hideMeshWireframe);
+               SetWireframeDisplay(jobs[i].renderer, hideMeshWireframe);
             }
 
             Matrix4x4 mtx = jobs[i].meshFilter.transform.localToWorldMatrix;
@@ -2121,6 +2178,28 @@ namespace JBooth.VertexPainterPro
             if (msh == null)
             {
                msh = jobs[i].meshFilter.sharedMesh;
+            }
+
+            if (showNormals || showTangents)
+            {
+               for (int j = 0; j < jobs[i].verts.Length; ++j)
+               {
+                  Vector3 v = mtx.MultiplyPoint(jobs[i].verts[j]);
+                  if (showNormals)
+                  {
+                     Handles.color = Color.blue;
+                     Handles.DrawLine(v, v + mtx.MultiplyVector(jobs[i].stream.GetSafeNormal(j)));
+                  }
+                  if (showTangents)
+                  {
+                     Handles.color = Color.yellow;
+                     var tang = jobs[i].stream.GetSafeTangent(j);
+                     var t2 = new Vector3(tang.x, tang.y, tang.z);
+                     t2 *= tang.w;
+
+                     Handles.DrawLine(v, v + mtx.MultiplyVector(t2));
+                  }
+               }
             }
 
             if (RXLookingGlass.IntersectRayMesh(ray, msh, mtx, out hit))
@@ -2248,6 +2327,13 @@ namespace JBooth.VertexPainterPro
 
          if (jobs.Length > 0 && painting)
          {
+            if (tab == Tab.Custom)
+            {
+               if (customBrush != null)
+               {
+                  customBrush.BeginApplyStroke(ray);
+               }
+            }
             var lerper = GetLerper();
             var value = GetBrushValue();
             for (int i = 0; i < jobs.Length; ++i)

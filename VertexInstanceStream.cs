@@ -66,7 +66,83 @@ namespace JBooth.VertexPainterPro
       public Vector3[] normals { get { return _normals; } set { _normals = value; Apply(); } }
       public Vector4[] tangents { get { return _tangents; } set { _tangents = value; Apply(); } }
 
-   #if UNITY_EDITOR
+
+      #if UNITY_EDITOR
+      Vector3[] cachedPositions;
+      public Vector3 GetSafePosition(int index)
+      {
+         if (_positions != null && index < _positions.Length)
+         {
+            return _positions[index];
+         }
+         if (cachedPositions == null)
+         {
+            MeshFilter mf = GetComponent<MeshFilter>();
+            if (mf == null || mf.sharedMesh == null)
+            {
+               Debug.LogError("No Mesh Filter or Mesh available");
+               return Vector3.zero;
+            }
+            cachedPositions = mf.sharedMesh.vertices;
+         }
+         if (index < cachedPositions.Length)
+         {
+            return cachedPositions[index];
+         }
+         return Vector3.zero;
+      }
+
+      Vector3[] cachedNormals;
+      public Vector3 GetSafeNormal(int index)
+      {
+         if (_normals != null && index < _normals.Length)
+         {
+            return _normals[index];
+         }
+         if (cachedPositions == null)
+         {
+            MeshFilter mf = GetComponent<MeshFilter>();
+            if (mf == null || mf.sharedMesh == null)
+            {
+               Debug.LogError("No Mesh Filter or Mesh available");
+               return Vector3.zero;
+            }
+            cachedNormals = mf.sharedMesh.normals;
+         }
+         if (cachedNormals != null && index < cachedNormals.Length)
+         {
+            return cachedNormals[index];
+         }
+         return new Vector3(0, 0, 1);
+      }
+
+      Vector4[] cachedTangents;
+      public Vector4 GetSafeTangent(int index)
+      {
+         if (_tangents != null && index < _tangents.Length)
+         {
+            return _tangents[index];
+         }
+         if (cachedTangents == null)
+         {
+            MeshFilter mf = GetComponent<MeshFilter>();
+            if (mf == null || mf.sharedMesh == null)
+            {
+               Debug.LogError("No Mesh Filter or Mesh available");
+               return Vector3.zero;
+            }
+            cachedTangents = mf.sharedMesh.tangents;
+         }
+         if (cachedTangents != null && index < cachedTangents.Length)
+         {
+            return cachedTangents[index];
+         }
+         return new Vector4(0, 1, 0, 1);
+      }
+
+      #endif
+
+      #if UNITY_EDITOR
       // Stored here to make copy/save behaviour work better - basically, if you copy a mesh around, you want to also
       // clone the original material otherwise it may have the preview material stuck on it forever. 
       [HideInInspector]
@@ -90,13 +166,19 @@ namespace JBooth.VertexPainterPro
                Material[] mats = new Material[mr.sharedMaterials.Length];
                for (int i = 0; i < mr.sharedMaterials.Length; ++i)
                {
-                  mats[i] = originalMaterial[i];
+                  if (originalMaterial[i] != null)
+                  {
+                     mats[i] = originalMaterial[i];
+                  }
                }
                mr.sharedMaterials = mats;
             }
             else if (originalMaterial != null && originalMaterial.Length > 0)
             {
-               mr.sharedMaterial = originalMaterial[0];
+               if (originalMaterial[0] != null)
+               {
+                  mr.sharedMaterial = originalMaterial[0];
+               }
             }
          }
       }
@@ -407,16 +489,22 @@ namespace JBooth.VertexPainterPro
          return null;
       }
 
-      // hack around unity bugs in the editor..
+      // In various versions of unity, you have to set .additionalVertexStreams every frame. 
+      // This was broken in 5.3, then broken again in 5.5..
    #if UNITY_EDITOR
       private Mesh meshStream;
       public Mesh GetModifierMesh() { return meshStream; }
+      private MeshRenderer meshRend = null;
       void Update()
       {
-         if (!Application.isPlaying)
+         // turns out this happens in play mode as well.. grrr..
+         if (meshRend == null)
          {
-            MeshRenderer r = GetComponent<MeshRenderer>();
-            r.additionalVertexStreams = meshStream;
+            meshRend = GetComponent<MeshRenderer>();
+         }
+         //if (!Application.isPlaying)
+         {
+            meshRend.additionalVertexStreams = meshStream;
          }
       }
    #endif

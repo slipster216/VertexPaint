@@ -7,6 +7,11 @@ namespace JBooth.VertexPainterPro
 {
    public partial class VertexPainterWindow : EditorWindow
    {
+      // for external tools
+      public System.Action<PaintJob[]> OnBeginStroke;
+      public System.Action<PaintJob, bool> OnStokeModified;  // bool is true when doing a fill or other non-bounded opperation
+      public System.Action OnEndStroke;
+
 
       // C# doesn't have *& or **, so it's not easy to pass a reference to a value for changing.
       // instead, we wrap the setter into a templated lambda which allows us to pass a changable
@@ -1331,6 +1336,7 @@ namespace JBooth.VertexPainterPro
 
       public void FillMesh(PaintJob job)
       {
+         
          PrepBrushMode(job);
          var lerper = GetLerper();
          var val = GetBrushValue();
@@ -1339,6 +1345,10 @@ namespace JBooth.VertexPainterPro
             lerper.Invoke(job, i, ref val, 1);
          }
          job.stream.Apply();
+         if (OnStokeModified != null)
+         {
+            OnStokeModified(job, true);
+         }
       }
 
       void RandomMesh(PaintJob job)
@@ -1365,7 +1375,7 @@ namespace JBooth.VertexPainterPro
          floatBrushValue = oldFloat;
       }
 
-      void InitColors(PaintJob j)
+      public void InitColors(PaintJob j)
       {
          Color[] colors = j.stream.colors;
          if (colors == null || colors.Length != j.verts.Length)
@@ -1382,7 +1392,7 @@ namespace JBooth.VertexPainterPro
          }
       }
 
-      void InitUV0(PaintJob j)
+      public void InitUV0(PaintJob j)
       {
          List<Vector4> uvs = j.stream.uv0;
          if (uvs == null || uvs.Count != j.verts.Length)
@@ -1400,7 +1410,7 @@ namespace JBooth.VertexPainterPro
          }
       }
 
-      void InitUV1(PaintJob j)
+      public void InitUV1(PaintJob j)
       {
          var uvs = j.stream.uv1;
          if (uvs == null || uvs.Count != j.verts.Length)
@@ -1418,7 +1428,7 @@ namespace JBooth.VertexPainterPro
          }
       }
 
-      void InitUV2(PaintJob j)
+      public void InitUV2(PaintJob j)
       {
          var uvs = j.stream.uv2;
          if (uvs == null || uvs.Count != j.verts.Length)
@@ -1436,7 +1446,7 @@ namespace JBooth.VertexPainterPro
          }
       }
 
-      void InitUV3(PaintJob j)
+      public void InitUV3(PaintJob j)
       {
          var uvs = j.stream.uv3;
          if (uvs == null || uvs.Count != j.verts.Length)
@@ -1454,7 +1464,7 @@ namespace JBooth.VertexPainterPro
          }
       }
 
-      void InitPositions(PaintJob j)
+      public void InitPositions(PaintJob j)
       {
          Vector3[] pos = j.stream.positions;
          if (pos == null || pos.Length != j.verts.Length)
@@ -1469,7 +1479,7 @@ namespace JBooth.VertexPainterPro
          return;
       }
 
-      void InitNormalTangent(PaintJob j)
+      public void InitNormalTangent(PaintJob j)
       {
          Vector3[] norms = j.stream.normals;
          if (norms == null || norms.Length != j.verts.Length)
@@ -1668,21 +1678,44 @@ namespace JBooth.VertexPainterPro
             return;
          }
          // convert point into local space, so we don't have to convert every point
+         var mtx = j.renderer.transform.localToWorldMatrix;
          point = j.renderer.transform.worldToLocalMatrix.MultiplyPoint3x4(point);
          // for some reason this doesn't handle scale, seems like it should
          // we handle it poorly until I can find a better solution
          float scale = 1.0f / Mathf.Abs(j.renderer.transform.lossyScale.x);
 
          float bz = scale * brushSize;
+         bz *= bz;
 
          for (int i = 0; i < j.verts.Length; ++i)
          {
-            float d = Vector3.Distance(point, j.verts[i]);
-            if (d < bz)
+            //float d = Vector3.Distance(point, j.verts[i]);
+            var p = j.verts[i];
+            float x = point.x - p.x;
+            float y = point.y - p.y;
+            float z = point.z - p.z;
+            float dist = x * x + y * y + z * z;
+
+            if (dist < bz)
             {
                Handles.color = showVertexColor;
-               Vector3 wp = j.meshFilter.transform.localToWorldMatrix.MultiplyPoint(j.verts[i]);
+               Vector3 wp = mtx.MultiplyPoint(j.verts[i]);
                Handles.SphereCap(0, wp, Quaternion.identity, HandleUtility.GetHandleSize(wp) * 0.02f * showVertexSize);
+
+               if (showNormals)
+               {
+                  Handles.color = Color.blue;
+                  Handles.DrawLine(wp, wp + mtx.MultiplyVector(j.stream.GetSafeNormal(i)));
+               }
+               if (showTangents)
+               {
+                  Handles.color = Color.yellow;
+                  var tang = j.stream.GetSafeTangent(i);
+                  var t2 = new Vector3(tang.x, tang.y, tang.z);
+                  t2 *= tang.w;
+
+                  Handles.DrawLine(wp, wp + mtx.MultiplyVector(t2));
+               }
             }
          }
       }
@@ -1699,6 +1732,7 @@ namespace JBooth.VertexPainterPro
          float scale = 1.0f / Mathf.Abs(j.renderer.transform.lossyScale.x);
 
          float bz = scale * brushSize;
+         bz *= bz;
 
          float pressure = Event.current.pressure > 0 ? Event.current.pressure : 1.0f;
 
@@ -1710,8 +1744,14 @@ namespace JBooth.VertexPainterPro
             Vector2 target = new Vector2(0.5f, 0.5f);
             for (int i = 0; i < j.verts.Length; ++i)
             {
-               float d = Vector3.Distance(point, modPos ? j.stream.positions[i] : j.verts[i]);
-               if (d < bz)
+               Vector3 p = modPos ? j.stream.positions[i] : j.verts[i];
+               float x = point.x - p.x;
+               float y = point.y - p.y;
+               float z = point.z - p.z;
+               float dist = x * x + y * y + z * z;
+
+               //float d = Vector3.Distance(point, modPos ? j.stream.positions[i] : j.verts[i]);
+               if (dist < bz)
                {
                   Vector3 n = j.normals[i];
                   Vector4 t = j.tangents[i];
@@ -1753,7 +1793,7 @@ namespace JBooth.VertexPainterPro
                      }
                   }
 
-                  float str = 1.0f - d / bz;
+                  float str = 1.0f - dist / bz;
                   str *= strength;  // take brush speed into account..
                   str = Mathf.Pow(str, brushFalloff);
 
@@ -1771,10 +1811,15 @@ namespace JBooth.VertexPainterPro
          {
             for (int i = 0; i < j.verts.Length; ++i)
             {
-               float d = Vector3.Distance(point, j.verts[i]);
-               if (d < bz)
+               Vector3 p = modPos ? j.stream.positions[i] : j.verts[i];
+               float x = point.x - p.x;
+               float y = point.y - p.y;
+               float z = point.z - p.z;
+               float dist = x * x + y * y + z * z;
+               //float d = Vector3.Distance(point, j.verts[i]);
+               if (dist < bz)
                {
-                  float str = 1.0f - d / bz;
+                  float str = 1.0f - dist / bz;
                   str = Mathf.Pow(str, brushFalloff);
                   affected = true;
                   PaintVertPosition(j, i,  str * (float)deltaTime * brushFlow * pressure);
@@ -1785,10 +1830,16 @@ namespace JBooth.VertexPainterPro
          {
             for (int i = 0; i < j.verts.Length; ++i)
             {
-               float d = Vector3.Distance(point, j.verts[i]);
-               if (d < bz)
+               Vector3 p = modPos ? j.stream.positions[i] : j.verts[i];
+               float x = point.x - p.x;
+               float y = point.y - p.y;
+               float z = point.z - p.z;
+               float dist = x * x + y * y + z * z;
+               //float d = Vector3.Distance(point, j.verts[i]);
+               //float d = Vector3.Distance(point, j.verts[i]);
+               if (dist < bz)
                {
-                  float str = 1.0f - d / bz;
+                  float str = 1.0f - dist / bz;
                   str = Mathf.Pow(str, brushFalloff);
                   float finalStr = str * (float)deltaTime * brushFlow * pressure;
                   if (finalStr > 0)
@@ -1802,11 +1853,19 @@ namespace JBooth.VertexPainterPro
          if (affected)
          {
             j.stream.Apply();
+            if (OnStokeModified != null)
+            {
+               OnStokeModified(j, false);
+            }
          }
       }
 
       void EndStroke()
       {
+         if (OnEndStroke != null)
+         {
+            OnEndStroke();
+         }
          painting = false;
         
          // could possibly make this faster by avoiding the double apply..
@@ -2128,11 +2187,8 @@ namespace JBooth.VertexPainterPro
          // finding this, and even the paid Unity support my company pays many thousands of dollars for had no idea
          // after several weeks of back and forth. If your going to fake the coordinates for some reason, please do
          // it everywhere to not just randomly break things everywhere you don't multiply some new value in. 
-         #if UNITY_5_3
-         float mult = 1;
-         #else
          float mult = EditorGUIUtility.pixelsPerPoint;
-         #endif
+
          mousePosition.y = sceneView.camera.pixelHeight - mousePosition.y * mult;
          mousePosition.x *= mult;
          Vector3 fakeMP = mousePosition;
@@ -2165,6 +2221,10 @@ namespace JBooth.VertexPainterPro
                {
                   jobEdits[x] = false;
                }
+               if (OnBeginStroke != null)
+               {
+                  OnBeginStroke(jobs);
+               }
             }
             if (toggleWireframe)
             {
@@ -2182,29 +2242,6 @@ namespace JBooth.VertexPainterPro
             {
                msh = jobs[i].meshFilter.sharedMesh;
             }
-
-            if (showNormals || showTangents)
-            {
-               for (int j = 0; j < jobs[i].verts.Length; ++j)
-               {
-                  Vector3 v = mtx.MultiplyPoint(jobs[i].verts[j]);
-                  if (showNormals)
-                  {
-                     Handles.color = Color.blue;
-                     Handles.DrawLine(v, v + mtx.MultiplyVector(jobs[i].stream.GetSafeNormal(j)));
-                  }
-                  if (showTangents)
-                  {
-                     Handles.color = Color.yellow;
-                     var tang = jobs[i].stream.GetSafeTangent(j);
-                     var t2 = new Vector3(tang.x, tang.y, tang.z);
-                     t2 *= tang.w;
-
-                     Handles.DrawLine(v, v + mtx.MultiplyVector(t2));
-                  }
-               }
-            }
-
             if (RXLookingGlass.IntersectRayMesh(ray, msh, mtx, out hit))
             {
                if (Event.current.shift == false) 

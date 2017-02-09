@@ -12,6 +12,9 @@ namespace JBooth.VertexPainterPro
    [ExecuteInEditMode]
    public class VertexInstanceStream : MonoBehaviour
    {
+      public bool keepRuntimeData = false;
+
+
       [HideInInspector]
       [SerializeField]
       private Color[] _colors;
@@ -65,7 +68,6 @@ namespace JBooth.VertexPainterPro
       public Vector3[] positions { get { return _positions; } set { _positions = value; Apply(); } }
       public Vector3[] normals { get { return _normals; } set { _normals = value; Apply(); } }
       public Vector4[] tangents { get { return _tangents; } set { _tangents = value; Apply(); } }
-
 
       #if UNITY_EDITOR
       Vector3[] cachedPositions;
@@ -186,8 +188,12 @@ namespace JBooth.VertexPainterPro
 
    	void Start()
       {
-         
-         Apply(true);
+         Apply(!keepRuntimeData);
+         if (keepRuntimeData)
+         {
+            var mf = GetComponent<MeshFilter>();
+            _positions = mf.sharedMesh.vertices;
+         }
       }
 
       void OnDestroy()

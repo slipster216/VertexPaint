@@ -93,6 +93,7 @@ namespace JBooth.VertexPainterPro
             rolloutStyle = GUI.skin.box;
             rolloutStyle.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
          }
+         GUI.contentColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
          if (inset == true)
          {
             EditorGUILayout.BeginHorizontal();
@@ -192,8 +193,6 @@ namespace JBooth.VertexPainterPro
             var oldShow = showVertexShader;
             EditorGUILayout.BeginHorizontal();
             showVertexShader = GUILayout.Toggle(showVertexShader, "Show Vertex Data (ctrl-V)");
-            showNormals = GUILayout.Toggle(showNormals, "Normals");
-            showTangents = GUILayout.Toggle(showTangents, "Tangents");
             if (oldShow != showVertexShader)
             {
                UpdateDisplayMode();
@@ -221,8 +220,10 @@ namespace JBooth.VertexPainterPro
             brushVisualization = (BrushVisualization)EditorGUILayout.EnumPopup("Brush Visualization", brushVisualization);
             EditorGUILayout.BeginHorizontal();
             showVertexPoints = GUILayout.Toggle(showVertexPoints, "Show Brush Influence");
-            showVertexSize = EditorGUILayout.Slider("   Size", showVertexSize, 0.2f, 10);
+            showVertexSize = EditorGUILayout.Slider(showVertexSize, 0.2f, 10);
             showVertexColor = EditorGUILayout.ColorField(showVertexColor, GUILayout.Width(40));
+            showNormals = GUILayout.Toggle(showNormals, "N");
+            showTangents = GUILayout.Toggle(showTangents, "T");
             EditorGUILayout.EndHorizontal();
             bool oldHideMeshWireframe = hideMeshWireframe;
             hideMeshWireframe = !GUILayout.Toggle(!hideMeshWireframe, "Show Wireframe (ctrl-W)");
@@ -373,7 +374,7 @@ namespace JBooth.VertexPainterPro
       {
          brushSize      = EditorGUILayout.Slider("Brush Size", brushSize, 0.01f, 30.0f);
          brushFlow      = EditorGUILayout.Slider("Brush Flow", brushFlow, 0.1f, 128.0f);
-         brushFalloff   = EditorGUILayout.Slider("Brush Falloff", brushFalloff, 0.1f, 4.0f);
+         brushFalloff   = EditorGUILayout.Slider("Brush Falloff", brushFalloff, 0.1f, 3.5f);
 
          if (tab == Tab.Paint && flowTarget != FlowTarget.ColorBA && flowTarget != FlowTarget.ColorRG)
          {
@@ -398,12 +399,20 @@ namespace JBooth.VertexPainterPro
          EditorGUILayout.BeginHorizontal();
          if (GUILayout.Button("Fill"))
          {
+            if (OnBeginStroke != null)
+            {
+               OnBeginStroke(jobs);
+            }
             for (int i = 0; i < jobs.Length; ++i)
             {
                Undo.RecordObject(jobs[i].stream, "Vertex Painter Fill");
                FillMesh(jobs[i]);
             }
             Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+            if (OnEndStroke != null)
+            {
+               OnEndStroke();
+            }
          }
 
          EditorGUILayout.EndHorizontal();
@@ -489,10 +498,18 @@ namespace JBooth.VertexPainterPro
          EditorGUILayout.BeginHorizontal();
          if (GUILayout.Button("Fill"))
          {
+            if (OnBeginStroke != null)
+            {
+               OnBeginStroke(jobs);
+            }
             for (int i = 0; i < jobs.Length; ++i)
             {
                Undo.RecordObject(jobs[i].stream, "Vertex Painter Fill");
                FillMesh(jobs[i]);
+            }
+            if (OnEndStroke != null)
+            {
+               OnEndStroke();
             }
             Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
          }

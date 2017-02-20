@@ -437,7 +437,6 @@ namespace JBooth.VertexPainterPro
          {
             int vertexCount = mf.sharedMesh.vertexCount;
             Mesh stream = meshStream;
-            Profiler.BeginSample("Create new stream");
             if (stream == null || vertexCount != stream.vertexCount)
             {
                if (stream != null)
@@ -464,9 +463,6 @@ namespace JBooth.VertexPainterPro
 
                stream.hideFlags = HideFlags.HideAndDontSave;
             }
-            Profiler.EndSample();
-
-            Profiler.BeginSample("Get Data");
             if (_positions != null && _positions.Length == vertexCount) { stream.vertices = _positions; }
             if (_normals != null && _normals.Length == vertexCount) { stream.normals = _normals; } else { stream.normals = null; }
             if (_tangents != null && _tangents.Length == vertexCount) { stream.tangents = _tangents; } else { stream.tangents = null; }
@@ -475,13 +471,9 @@ namespace JBooth.VertexPainterPro
             if (_uv1 != null && _uv1.Count == vertexCount) { stream.SetUVs(1, _uv1); }  else { stream.uv2 = null; }
             if (_uv2 != null && _uv2.Count == vertexCount) { stream.SetUVs(2, _uv2); }  else { stream.uv3 = null; }
             if (_uv3 != null && _uv3.Count == vertexCount) { stream.SetUVs(3, _uv3); }  else { stream.uv4 = null; }
-            Profiler.EndSample();
 
-            Profiler.BeginSample("Enforce colors");
             EnforceOriginalMeshHasColors(stream);
-            Profiler.EndSample();
-
-            Profiler.BeginSample("Upload");
+ 
             if (!Application.isPlaying || Application.isEditor)
             {
                // only mark no longer readable in game..
@@ -490,7 +482,6 @@ namespace JBooth.VertexPainterPro
 
             stream.UploadMeshData(markNoLongerReadable);
             mr.additionalVertexStreams = stream;
-            Profiler.EndSample();
             return stream;
          }
          return null;

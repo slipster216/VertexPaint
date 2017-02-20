@@ -276,6 +276,24 @@ namespace JBooth.VertexPainterPro
                   }
                   Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
                }
+               if (hasColors && DrawClearButton("RGB"))
+               {
+                  for (int i = 0; i < jobs.Length; ++i)
+                  {
+                     Undo.RecordObject(jobs[i].stream, "Vertex Painter Clear");
+                     var stream = jobs[i].stream;
+                     Color[] src = jobs[i].meshFilter.sharedMesh.colors;
+                     int count = jobs[i].meshFilter.sharedMesh.colors.Length;
+                     for (int j = 0; j < count; ++j)
+                     {
+                        stream.colors[j].r = src[j].r;
+                        stream.colors[j].g = src[j].g;
+                        stream.colors[j].b = src[j].b;
+                     }
+                     stream.Apply();
+                  }
+                  Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
+               }
                if (hasUV0 && DrawClearButton("UV0"))
                {
                   for (int i = 0; i < jobs.Length; ++i)

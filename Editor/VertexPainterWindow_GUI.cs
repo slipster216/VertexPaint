@@ -453,14 +453,15 @@ namespace JBooth.VertexPainterPro
          {
             UpdateDisplayMode();
          }
-         if (brushMode == BrushTarget.Color || brushMode == BrushTarget.UV0_AsColor || brushMode == BrushTarget.UV1_AsColor
+         if (brushMode == BrushTarget.Color || brushMode == BrushTarget.RGB || brushMode == BrushTarget.UV0_AsColor || brushMode == BrushTarget.UV1_AsColor
             || brushMode == BrushTarget.UV2_AsColor || brushMode == BrushTarget.UV3_AsColor)
          {
             brushColorMode = (BrushColorMode)EditorGUILayout.EnumPopup("Blend Mode", (System.Enum)brushColorMode);
 
             if (brushColorMode == BrushColorMode.Overlay || brushColorMode == BrushColorMode.Normal)
             {
-               brushColor = EditorGUILayout.ColorField("Brush Color", brushColor);
+               bool showAlpha = brushMode != BrushTarget.RGB;
+               brushColor = EditorGUILayout.ColorField(new GUIContent("Brush Color"), brushColor, true, showAlpha, false, null);
 
                if (GUILayout.Button("Reset Palette", EditorStyles.miniButton, GUILayout.Width(80), GUILayout.Height(16)))
                {

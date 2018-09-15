@@ -166,6 +166,13 @@ namespace JBooth.VertexPainterPro
          c0.b = Mathf.Lerp(c0.b, c0.b < 0.5f ? (2.0f * c0.b * t.b) : (1.0f - 2.0f * (1.0f - c0.b) * (1.0f - t.b)), r);
          st.colors[idx] = c0;
       }
+      static void ColorRGB(PaintJob j, int idx, ref object v, float r)
+      {
+         var s = j.stream;
+         float a = s.colors[idx].a;
+         s.colors[idx] = Color.Lerp(s.colors[idx], (Color)v, r);
+         s.colors[idx].a = a;
+      }
       static void ColorR(PaintJob j, int idx, ref object v, float r)
       {
          var s = j.stream;
@@ -616,6 +623,25 @@ namespace JBooth.VertexPainterPro
                         return ColorRGBADesaturate;
                   }
                }
+               return ColorRGBA;
+            case BrushTarget.RGB:
+               {
+                  switch (brushColorMode)
+                  {
+                     case BrushColorMode.Normal:
+                        return ColorRGB;
+                     case BrushColorMode.Overlay:
+                        return ColorRGBAOverlay;
+                     case BrushColorMode.Lighten:
+                        return ColorRGBALighten;
+                     case BrushColorMode.Darken:
+                        return ColorRGBADarken;
+                     case BrushColorMode.Saturate:
+                        return ColorRGBASaturate;
+                     case BrushColorMode.Desaturate:
+                        return ColorRGBADesaturate;
+                  }
+               }
                return ColorRGBA;  
             case BrushTarget.ValueR:
                return ColorR;
@@ -842,6 +868,13 @@ namespace JBooth.VertexPainterPro
                {
                   s.colors[idx] *= (Color)v;
                };     
+            case BrushTarget.RGB:
+               return delegate(VertexInstanceStream s, int idx, ref object v)
+               {
+                  float a = s.colors[idx].a;
+                  s.colors[idx] *= (Color)v;
+                  s.colors[idx].a = a;
+               };
             case BrushTarget.ValueR:
                return delegate(VertexInstanceStream s, int idx, ref object v)
                {
@@ -1043,6 +1076,8 @@ namespace JBooth.VertexPainterPro
          {
             case BrushTarget.Color:
                return brushColor;  
+            case BrushTarget.RGB:
+               return brushColor;  
             case BrushTarget.ValueR:
                return brushValue / 255.0f;
             case BrushTarget.ValueG:
@@ -1094,6 +1129,7 @@ namespace JBooth.VertexPainterPro
       public enum BrushTarget
       {
          Color = 0,
+         RGB,
          ValueR,
          ValueG,
          ValueB,
@@ -1585,6 +1621,8 @@ namespace JBooth.VertexPainterPro
          switch (brushMode)
          {
             case BrushTarget.Color:
+               goto case BrushTarget.ValueA;
+            case BrushTarget.RGB:
                goto case BrushTarget.ValueA;
             case BrushTarget.ValueR:
                goto case BrushTarget.ValueA;
@@ -2318,7 +2356,7 @@ namespace JBooth.VertexPainterPro
          {
             Handles.color = customBrush.GetPreviewColor();
          }
-         else if (brushMode == BrushTarget.Color || brushMode == BrushTarget.UV0_AsColor || brushMode == BrushTarget.UV1_AsColor
+         else if (brushMode == BrushTarget.Color || brushMode == BrushTarget.RGB || brushMode == BrushTarget.UV0_AsColor || brushMode == BrushTarget.UV1_AsColor
             || brushMode == BrushTarget.UV2_AsColor || brushMode == BrushTarget.UV3_AsColor)
          {
             Handles.color = new Color(brushColor.r, brushColor.g, brushColor.b, 0.4f);

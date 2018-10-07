@@ -5,9 +5,7 @@ struct Input
 {
    float2 uv_Tex1;
    float4 color : COLOR;
-   #if _PARALLAXMAP
    float3 viewDir;
-   #endif
    #if (_FLOW1 || _FLOW2 || _FLOW3 || _FLOW4 || _FLOW5)
    float4 flowDir;
    #endif
@@ -114,6 +112,7 @@ void Flow(float2 uv, half2 flow, half speed, float intensity, out float2 uv1, ou
 
 void SharedVert (inout appdata_full v, out Input o) 
 {
+    UNITY_INITIALIZE_OUTPUT(Input,o);
     #if (_FLOW1 || _FLOW2 || _FLOW3 || _FLOW4 || _FLOW5)
     o.flowDir.xy = v.texcoord.xy;
     o.flowDir.zw = v.texcoord2.xy;
@@ -137,10 +136,7 @@ void SharedVert (inout appdata_full v, out Input o)
 
     o.uv_Tex1 = v.texcoord.xy;
     o.color = v.color;
-
-    #if _PARALLAXMAP
-    o.viewDir = float3(0,0,0);
-    #endif
+    o.viewDir = float3(0,0,1);
 
     #if _DISTBLEND
     o.worldPos = float3(0,0,0);

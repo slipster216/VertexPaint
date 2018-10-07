@@ -26,7 +26,7 @@ namespace JBooth.VertexPainterPro
          GameObject go = new GameObject("Combined Mesh");
          go.AddComponent<MeshRenderer>();
          var mf = go.AddComponent<MeshFilter>();
-         mesh.Optimize();
+         ;
          mesh.RecalculateBounds();
          mesh.UploadMeshData(false);
          mf.sharedMesh = mesh;
@@ -60,7 +60,7 @@ namespace JBooth.VertexPainterPro
          {
             copy.tangents = stream.tangents;
          }
-         copy.Optimize();
+         ;
          copy.RecalculateBounds();
          copy.UploadMeshData(false);
 

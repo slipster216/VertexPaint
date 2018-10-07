@@ -1,6 +1,6 @@
 Vertex Painter for Unity
 ©2015 Jason Booth
-Tested with Unity 5.3.2p2
+Tested with Unity 5.6.6
 
 Example Video:
 

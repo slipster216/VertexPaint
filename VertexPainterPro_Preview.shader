@@ -1,4 +1,6 @@
-﻿// I highly recomend you look in the example shaders rather than this one if your wondering how to best use
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+// I highly recomend you look in the example shaders rather than this one if your wondering how to best use
 // these tools. This shader is designed to not use textures and show visual information, which makes it rather
 // expensive since it has lots of procedural functions and a ton of display options in a single shader.
 
@@ -152,7 +154,7 @@ Shader "Hidden/VertexPainterPro_Preview"
          {
             v2f o;
             o.uv = v.uv0.xy;
-            o.vertex = mul(UNITY_MATRIX_MVP, v.vertex); 
+            o.vertex = UnityObjectToClipPos(v.vertex); 
             if (_tab > 1.9 && _tab < 2.1)
             {
                if (_flowTarget < 1)

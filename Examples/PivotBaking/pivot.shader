@@ -1,4 +1,6 @@
-﻿// Sub-Optimal shader example that rotates objects around the pivot of the original object. Pivot position is
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+// Sub-Optimal shader example that rotates objects around the pivot of the original object. Pivot position is
 // baked into UV2..
 
 Shader "Unlit/pivot"
@@ -78,7 +80,7 @@ Shader "Unlit/pivot"
             float4 rxyz = RotateXYZ(offset, rotate);
 
             // take the final rotation, and add the pivot back in to get our final position, then transform into MVP space
-            o.vertex = mul(UNITY_MATRIX_MVP, rxyz + pivot);
+            o.vertex = UnityObjectToClipPos(rxyz + pivot);
             // the baker puts a random number into the W channel. This is VERY useful, for instance, if you want
             // each object to rotate at a random speed or at a random angle, or for use in a random function as
             // a seed.

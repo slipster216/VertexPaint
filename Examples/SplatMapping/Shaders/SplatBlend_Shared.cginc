@@ -1,6 +1,3 @@
-
-
-
 struct Input 
 {
    float2 uv_Tex1;
@@ -14,10 +11,17 @@ struct Input
    #endif
 };
 
+fixed4 _Tint1, _SpecColor1;
+half _Glossiness1, _Metallic1, _Parallax1, _TexScale1, _Contrast1, _EmissiveMult1;
+float _DistUVScale1;
+UNITY_DECLARE_TEX2D(_Tex1);
+UNITY_DECLARE_TEX2D(_Normal1);
+UNITY_DECLARE_TEX2D(_GlossinessTex1);
+UNITY_DECLARE_TEX2D(_Emissive1);
+UNITY_DECLARE_TEX2D(_SpecGlossMap1);
 // macro for one layer of texture data      
-#define LAYER(__N) sampler2D _Tex##__N; fixed4 _Tint##__N; sampler2D _Normal##__N; sampler2D _GlossinessTex##__N; half _Glossiness##__N; half _Metallic##__N; half _Parallax##__N; half _TexScale##__N; half _Contrast##__N; sampler2D _Emissive##__N; half _EmissiveMult##__N; fixed4 _SpecColor##__N; sampler2D _SpecGlossMap##__N; float _DistUVScale##__N;
+#define LAYER(__N) UNITY_DECLARE_TEX2D_NOSAMPLER(_Tex##__N); fixed4 _Tint##__N; UNITY_DECLARE_TEX2D_NOSAMPLER(_Normal##__N); UNITY_DECLARE_TEX2D_NOSAMPLER(_GlossinessTex##__N); half _Glossiness##__N; half _Metallic##__N; half _Parallax##__N; half _TexScale##__N; half _Contrast##__N; UNITY_DECLARE_TEX2D_NOSAMPLER(_Emissive##__N); half _EmissiveMult##__N; fixed4 _SpecColor##__N; UNITY_DECLARE_TEX2D_NOSAMPLER(_SpecGlossMap##__N); float _DistUVScale##__N;
 
-LAYER(1)
 LAYER(2)
 LAYER(3)
 LAYER(4)
@@ -46,43 +50,43 @@ float _DistBlendMax;
 
 // we define the function based on what channel is actively compiled for flow data - other combinations else into a standard tex2D
 #if _FLOW1
-#define FETCH_TEX1(_T, _UV) lerp(tex2D(_T, fuv1), tex2D(_T, fuv2), flowInterp)
+#define FETCH_TEX1(_T, _S, _UV) lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, fuv1), UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, fuv2), flowInterp)
 #elif _DISTBLEND
-#define FETCH_TEX1(_T, _UV) lerp(tex2D(_T, _UV), tex2D(_T, _UV*_DistUVScale1), dist)
+#define FETCH_TEX1(_T, _S, _UV) lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV), UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV*_DistUVScale1), dist)
 #else
-#define FETCH_TEX1(_T, _UV) tex2D(_T, _UV)
+#define FETCH_TEX1(_T, _S, _UV) UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV)
 #endif
 
 #if _FLOW2
-#define FETCH_TEX2(_T, _UV) lerp(tex2D(_T, fuv1), tex2D(_T, fuv2), flowInterp)
+#define FETCH_TEX2(_T, _S, _UV) lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, fuv1), UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, fuv2), flowInterp)
 #elif _DISTBLEND
-#define FETCH_TEX2(_T, _UV) lerp(tex2D(_T, _UV), tex2D(_T, _UV*_DistUVScale2), dist)
+#define FETCH_TEX2(_T, _S, _UV) lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV), UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV*_DistUVScale2), dist)
 #else
-#define FETCH_TEX2(_T, _UV) tex2D(_T, _UV)
+#define FETCH_TEX2(_T, _S, _UV) UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV)
 #endif
 
 #if _FLOW3
-#define FETCH_TEX3(_T, _UV) lerp(tex2D(_T, fuv1), tex2D(_T, fuv2), flowInterp)
+#define FETCH_TEX3(_T, _S, _UV) lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, fuv1), UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, fuv2), flowInterp)
 #elif _DISTBLEND
-#define FETCH_TEX3(_T, _UV) lerp(tex2D(_T, _UV), tex2D(_T, _UV*_DistUVScale3), dist)
+#define FETCH_TEX3(_T, _S, _UV) lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV), UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV*_DistUVScale3), dist)
 #else
-#define FETCH_TEX3(_T, _UV) tex2D(_T, _UV)
+#define FETCH_TEX3(_T, _S, _UV) UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV)
 #endif
 
 #if _FLOW4
-#define FETCH_TEX4(_T, _UV) lerp(tex2D(_T, fuv1), tex2D(_T, fuv2), flowInterp)
+#define FETCH_TEX4(_T, _S, _UV) lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, fuv1), UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, fuv2), flowInterp)
 #elif _DISTBLEND
-#define FETCH_TEX4(_T, _UV) lerp(tex2D(_T, _UV), tex2D(_T, _UV*_DistUVScale4), dist)
+#define FETCH_TEX4(_T, _S, _UV) lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV), UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV*_DistUVScale4), dist)
 #else
-#define FETCH_TEX4(_T, _UV) tex2D(_T, _UV)
+#define FETCH_TEX4(_T, _S, _UV) UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV)
 #endif
 
 #if _FLOW5
-#define FETCH_TEX5(_T, _UV) lerp(tex2D(_T, fuv1), tex2D(_T, fuv2), flowInterp)
+#define FETCH_TEX5(_T, _S, _UV) lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, fuv1), UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, fuv2), flowInterp)
 #elif _DISTBLEND
-#define FETCH_TEX5(_T, _UV) lerp(tex2D(_T, _UV), tex2D(_T, _UV*_DistUVScale5), dist)
+#define FETCH_TEX5(_T, _S, _UV) lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV), UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV*_DistUVScale5), dist)
 #else
-#define FETCH_TEX5(_T, _UV) tex2D(_T, _UV)
+#define FETCH_TEX5(_T, _S, _UV) UNITY_SAMPLE_TEX2D_SAMPLER(_T, _S, _UV)
 #endif  
 
 // given two height values (from textures) and a height value for the current pixel (from vertex)

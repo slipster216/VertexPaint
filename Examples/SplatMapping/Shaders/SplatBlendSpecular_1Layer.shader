@@ -58,11 +58,11 @@ Shader "VertexPainter/SplatBlendSpecular_1Layer"
          float2 uv1 = IN.uv_Tex1 * _TexScale1;
          INIT_FLOW
          #if _FLOWDRIFT || !_PARALLAXMAP 
-         fixed4 c1 = FETCH_TEX1(_Tex1, uv1);
+         fixed4 c1 = FETCH_TEX1(_Tex1, _Tex1, uv1);
          #elif _DISTBLEND
-         fixed4 c1 = lerp(tex2D(_Tex1, uv1), tex2D(_Tex1, uv1*_DistUVScale1), dist);
+         fixed4 c1 = lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_Tex1, _Tex1, uv1), UNITY_SAMPLE_TEX2D_SAMPLER(_Tex1, _Tex1, uv1*_DistUVScale1), dist);
          #else
-         fixed4 c1 = tex2D(_Tex1, uv1);
+         fixed4 c1 = UNITY_SAMPLE_TEX2D_SAMPLER(_Tex1, _Tex1, uv1);
          #endif
          
          #if _PARALLAXMAP
@@ -73,13 +73,13 @@ Shader "VertexPainter/SplatBlendSpecular_1Layer"
          fuv1 += offset;
          fuv2 += offset;
          #endif
-         c1 = FETCH_TEX1(_Tex1, uv1);
+         c1 = FETCH_TEX1(_Tex1, _Tex1, uv1);
          #endif
 
          c1 *= _Tint1;
 
          #if _SPECGLOSSMAP
-         fixed4 g1 = FETCH_TEX1(_SpecGlossMap1, uv1);
+         fixed4 g1 = FETCH_TEX1(_SpecGlossMap1, _SpecGlossMap1, uv1);
          o.Smoothness = g1.a;
          o.Specular = g1.rgb;
          #else
@@ -87,14 +87,13 @@ Shader "VertexPainter/SplatBlendSpecular_1Layer"
          o.Specular = _SpecColor1.rgb;
          #endif 
          
-         
          #if _EMISSION
-         fixed4 e1 = FETCH_TEX1(_Emissive1, uv1);
+         fixed4 e1 = FETCH_TEX1(_Emissive1, _Emissive1, uv1);
          o.Emission = e1.rgb * _EmissiveMult1;
          #endif
          
          #if _NORMALMAP
-         fixed4 n1 = FETCH_TEX1(_Normal1, uv1);
+         fixed4 n1 = FETCH_TEX1(_Normal1, _Normal1, uv1);
          o.Normal = UnpackNormal(n1);
          #endif
          

@@ -118,23 +118,23 @@ Shader "VertexPainter/SplatBlend_5Layer"
          float2 uv5 = IN.uv_Tex1 * _TexScale5;
          INIT_FLOW
          #if _FLOWDRIFT || !_PARALLAXMAP
-         fixed4 c1 = FETCH_TEX1(_Tex1, uv1);
-         fixed4 c2 = FETCH_TEX2(_Tex2, uv2);
-         fixed4 c3 = FETCH_TEX3(_Tex3, uv3);
-         fixed4 c4 = FETCH_TEX4(_Tex4, uv4);
-         fixed4 c5 = FETCH_TEX5(_Tex5, uv5);
+         fixed4 c1 = FETCH_TEX1(_Tex1, _Tex1, uv1);
+         fixed4 c2 = FETCH_TEX2(_Tex2, _Tex1, uv2);
+         fixed4 c3 = FETCH_TEX3(_Tex3, _Tex1, uv3);
+         fixed4 c4 = FETCH_TEX4(_Tex4, _Tex1, uv4);
+         fixed4 c5 = FETCH_TEX5(_Tex5, _Tex1, uv5);
          #elif _DISTBLEND
-         fixed4 c1 = lerp(tex2D(_Tex1, uv1), tex2D(_Tex1, uv1*_DistUVScale1), dist);
-         fixed4 c2 = lerp(tex2D(_Tex2, uv2), tex2D(_Tex2, uv2*_DistUVScale2), dist);
-         fixed4 c3 = lerp(tex2D(_Tex3, uv3), tex2D(_Tex3, uv3*_DistUVScale3), dist);
-         fixed4 c4 = lerp(tex2D(_Tex4, uv4), tex2D(_Tex4, uv4*_DistUVScale4), dist);
-         fixed4 c5 = lerp(tex2D(_Tex5, uv5), tex2D(_Tex5, uv5*_DistUVScale5), dist);
+         fixed4 c1 = lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_Tex1, _Tex1, uv1), UNITY_SAMPLE_TEX2D_SAMPLER(_Tex1, _Tex1, uv1*_DistUVScale1), dist);
+         fixed4 c2 = lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_Tex2, _Tex1, uv2), UNITY_SAMPLE_TEX2D_SAMPLER(_Tex2, _Tex1, uv2*_DistUVScale2), dist);
+         fixed4 c3 = lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_Tex3, _Tex1, uv3), UNITY_SAMPLE_TEX2D_SAMPLER(_Tex3, _Tex1, uv3*_DistUVScale3), dist);
+         fixed4 c4 = lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_Tex4, _Tex1, uv4), UNITY_SAMPLE_TEX2D_SAMPLER(_Tex4, _Tex1, uv4*_DistUVScale4), dist);
+         fixed4 c5 = lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_Tex5, _Tex1, uv5), UNITY_SAMPLE_TEX2D_SAMPLER(_Tex5, _Tex1, uv5*_DistUVScale5), dist);
          #else
-         fixed4 c1 = tex2D(_Tex1, uv1);
-         fixed4 c2 = tex2D(_Tex2, uv2);
-         fixed4 c3 = tex2D(_Tex3, uv3);
-         fixed4 c4 = tex2D(_Tex4, uv4);
-         fixed4 c5 = tex2D(_Tex5, uv5);
+         fixed4 c1 = UNITY_SAMPLE_TEX2D_SAMPLER(_Tex1, _Tex1, uv1);
+         fixed4 c2 = UNITY_SAMPLE_TEX2D_SAMPLER(_Tex2, _Tex1, uv2);
+         fixed4 c3 = UNITY_SAMPLE_TEX2D_SAMPLER(_Tex3, _Tex1, uv3);
+         fixed4 c4 = UNITY_SAMPLE_TEX2D_SAMPLER(_Tex4, _Tex1, uv4);
+         fixed4 c5 = UNITY_SAMPLE_TEX2D_SAMPLER(_Tex5, _Tex1, uv5);
          #endif
          half b1 = HeightBlend(c1.a, c2.a, IN.color.r, _Contrast2);
          fixed h1 = lerp(c1.a, c2.a, b1);
@@ -148,52 +148,52 @@ Shader "VertexPainter/SplatBlend_5Layer"
          #if _FLOW2
             b1 *= _FlowAlpha;
             #if _FLOWREFRACTION && _NORMALMAP
-               half4 rn = FETCH_TEX2 (_Normal2, uv2) - 0.5;
+               half4 rn = FETCH_TEX2 (_Normal2, _Normal1, uv2) - 0.5;
                uv1 += rn.xy * b1 * _FlowRefraction;
                #if !_PARALLAXMAP 
-                  c1 = FETCH_TEX1(_Tex1, uv1);
+                  c1 = FETCH_TEX1(_Tex1, _Tex1, uv1);
                #endif
             #endif
          #endif
          #if _FLOW3
             b2 *= _FlowAlpha;
             #if _FLOWREFRACTION && _NORMALMAP
-               half4 rn = FETCH_TEX3 (_Normal3, uv3) - 0.5;
+               half4 rn = FETCH_TEX3 (_Normal3, _Normal1, uv3) - 0.5;
                uv1 += rn.xy * b1 * _FlowRefraction;
                uv2 += rn.xy * b2 * _FlowRefraction;
                #if !_PARALLAXMAP 
-                  c1 = FETCH_TEX1(_Tex1, uv1);
-                  c2 = FETCH_TEX2(_Tex2, uv2);
+                  c1 = FETCH_TEX1(_Tex1, _Tex1, uv1);
+                  c2 = FETCH_TEX2(_Tex2, _Tex1, uv2);
                #endif
             #endif
          #endif
          #if _FLOW4
             b3 *= _FlowAlpha;
             #if _FLOWREFRACTION && _NORMALMAP
-               half4 rn = FETCH_TEX4 (_Normal4, uv4) - 0.5;
+               half4 rn = FETCH_TEX4 (_Normal4, _Normal1, uv4) - 0.5;
                uv1 += rn.xy * b1 * _FlowRefraction;
                uv2 += rn.xy * b2 * _FlowRefraction;
                uv3 += rn.xy * b3 * _FlowRefraction;
                #if !_PARALLAXMAP 
-                  c1 = FETCH_TEX1(_Tex1, uv1);
-                  c2 = FETCH_TEX2(_Tex2, uv2);
-                  c3 = FETCH_TEX3(_Tex3, uv3);
+                  c1 = FETCH_TEX1(_Tex1, _Tex1, uv1);
+                  c2 = FETCH_TEX2(_Tex2, _Tex1, uv2);
+                  c3 = FETCH_TEX3(_Tex3, _Tex1, uv3);
                #endif
             #endif
          #endif
          #if _FLOW5
             b4 *= _FlowAlpha;
             #if _FLOWREFRACTION && _NORMALMAP
-               half4 rn = FETCH_TEX5 (_Normal5, uv5) - 0.5;
+               half4 rn = FETCH_TEX5 (_Normal5, _Normal1, uv5) - 0.5;
                uv1 += rn.xy * b1 * _FlowRefraction;
                uv2 += rn.xy * b2 * _FlowRefraction;
                uv3 += rn.xy * b3 * _FlowRefraction;
                uv4 += rn.xy * b4 * _FlowRefraction;
                #if !_PARALLAXMAP 
-                  c1 = FETCH_TEX1(_Tex1, uv1);
-                  c2 = FETCH_TEX2(_Tex2, uv2);
-                  c3 = FETCH_TEX3(_Tex3, uv3);
-                  c4 = FETCH_TEX4(_Tex4, uv4);
+                  c1 = FETCH_TEX1(_Tex1, _Tex1, uv1);
+                  c2 = FETCH_TEX2(_Tex2, _Tex1, uv2);
+                  c3 = FETCH_TEX3(_Tex3, _Tex1, uv3);
+                  c4 = FETCH_TEX4(_Tex4, _Tex1, uv4);
                #endif
             #endif
          #endif
@@ -208,11 +208,11 @@ Shader "VertexPainter/SplatBlend_5Layer"
          uv3 += offset;
          uv4 += offset;
          uv5 += offset;
-         c1 = FETCH_TEX1(_Tex1, uv1);
-         c2 = FETCH_TEX2(_Tex2, uv2);
-         c3 = FETCH_TEX3(_Tex3, uv3);
-         c4 = FETCH_TEX4(_Tex4, uv4);
-         c5 = FETCH_TEX5(_Tex5, uv5);
+         c1 = FETCH_TEX1(_Tex1, _Tex1, uv1);
+         c2 = FETCH_TEX2(_Tex2, _Tex1, uv2);
+         c3 = FETCH_TEX3(_Tex3, _Tex1, uv3);
+         c4 = FETCH_TEX4(_Tex4, _Tex1, uv4);
+         c5 = FETCH_TEX5(_Tex5, _Tex1, uv5);
          #if (_FLOW1 || _FLOW2 || _FLOW3 || _FLOW4 || _FLOW5)
          fuv1 += offset;
          fuv2 += offset;
@@ -222,20 +222,20 @@ Shader "VertexPainter/SplatBlend_5Layer"
          fixed4 c = lerp(lerp(lerp(lerp(c1 * _Tint1, c2 * _Tint2, b1), c3 * _Tint3, b2), c4 * _Tint4, b3), c5 * _Tint5, b4);
          
          #if _NORMALMAP
-         half4 n1 =  (FETCH_TEX1 (_Normal1, uv1));
-         half4 n2 =  (FETCH_TEX2 (_Normal2, uv2));
-         half4 n3 =  (FETCH_TEX3 (_Normal3, uv3));
-         half4 n4 =  (FETCH_TEX4 (_Normal4, uv4));
-         half4 n5 =  (FETCH_TEX5 (_Normal5, uv5));
+         half4 n1 =  (FETCH_TEX1 (_Normal1, _Normal1, uv1));
+         half4 n2 =  (FETCH_TEX2 (_Normal2, _Normal1, uv2));
+         half4 n3 =  (FETCH_TEX3 (_Normal3, _Normal1, uv3));
+         half4 n4 =  (FETCH_TEX4 (_Normal4, _Normal1, uv4));
+         half4 n5 =  (FETCH_TEX5 (_Normal5, _Normal1, uv5));
          o.Normal = UnpackNormal(lerp(lerp(lerp(lerp(n1, n2, b1), n3, b2), n4, b3), n5, b4));
          #endif
          
          #if _METALLICGLOSSMAP
-         fixed4 g1 = FETCH_TEX1(_GlossinessTex1, uv1);
-         fixed4 g2 = FETCH_TEX2(_GlossinessTex2, uv2);
-         fixed4 g3 = FETCH_TEX3(_GlossinessTex3, uv3);
-         fixed4 g4 = FETCH_TEX4(_GlossinessTex4, uv4);
-         fixed4 g5 = FETCH_TEX5(_GlossinessTex5, uv4);
+         fixed4 g1 = FETCH_TEX1(_GlossinessTex1, _GlossinessTex1, uv1);
+         fixed4 g2 = FETCH_TEX2(_GlossinessTex2, _GlossinessTex1, uv2);
+         fixed4 g3 = FETCH_TEX3(_GlossinessTex3, _GlossinessTex1, uv3);
+         fixed4 g4 = FETCH_TEX4(_GlossinessTex4, _GlossinessTex1, uv4);
+         fixed4 g5 = FETCH_TEX5(_GlossinessTex5, _GlossinessTex1, uv4);
          fixed4 gf = lerp(lerp(lerp(lerp(g1, g2, b1), g3, b2), g4, b3), g5, b4);
          o.Smoothness = gf.a;
          o.Metallic = gf.r;
@@ -245,11 +245,11 @@ Shader "VertexPainter/SplatBlend_5Layer"
          #endif
 
          #if _EMISSION
-         fixed4 e1 = FETCH_TEX1(_Emissive1, uv1);
-         fixed4 e2 = FETCH_TEX2(_Emissive2, uv2);
-         fixed4 e3 = FETCH_TEX3(_Emissive3, uv3);
-         fixed4 e4 = FETCH_TEX4(_Emissive4, uv4);
-         fixed4 e5 = FETCH_TEX5(_Emissive5, uv5);
+         fixed4 e1 = FETCH_TEX1(_Emissive1, _Emissive1, uv1);
+         fixed4 e2 = FETCH_TEX2(_Emissive2, _Emissive1, uv2);
+         fixed4 e3 = FETCH_TEX3(_Emissive3, _Emissive1, uv3);
+         fixed4 e4 = FETCH_TEX4(_Emissive4, _Emissive1, uv4);
+         fixed4 e5 = FETCH_TEX5(_Emissive5, _Emissive1, uv5);
          o.Emission = lerp(lerp(lerp(lerp(e1.rgb * _EmissiveMult1, 
                                      e2.rgb * _EmissiveMult2, b1), 
                                      e3.rgb * _EmissiveMult3, b2),

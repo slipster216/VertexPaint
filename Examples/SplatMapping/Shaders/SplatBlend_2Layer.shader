@@ -75,14 +75,14 @@ Shader "VertexPainter/SplatBlend_2Layer"
          float2 uv2 = IN.uv_Tex1 * _TexScale2;
          INIT_FLOW
          #if _FLOWDRIFT || !_PARALLAXMAP 
-         fixed4 c1 = FETCH_TEX1(_Tex1, uv1);
-         fixed4 c2 = FETCH_TEX2(_Tex2, uv2);
+         fixed4 c1 = FETCH_TEX1(_Tex1, _Tex1, uv1);
+         fixed4 c2 = FETCH_TEX2(_Tex2, _Tex1, uv2);
          #elif _DISTBLEND
-         fixed4 c1 = lerp(tex2D(_Tex1, uv1), tex2D(_Tex1, uv1*_DistUVScale1), dist);
-         fixed4 c2 = lerp(tex2D(_Tex2, uv2), tex2D(_Tex2, uv2*_DistUVScale2), dist);
+         fixed4 c1 = lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_Tex1, _Tex1, uv1), UNITY_SAMPLE_TEX2D_SAMPLER(_Tex1, _Tex1, uv1*_DistUVScale1), dist);
+         fixed4 c2 = lerp(UNITY_SAMPLE_TEX2D_SAMPLER(_Tex2, _Tex1, uv2), UNITY_SAMPLE_TEX2D_SAMPLER(_Tex2, _Tex1, uv2*_DistUVScale2), dist);
          #else
-         fixed4 c1 = tex2D(_Tex1, uv1);
-         fixed4 c2 = tex2D(_Tex2, uv2);
+         fixed4 c1 = UNITY_SAMPLE_TEX2D_SAMPLER(_Tex1, _Tex1, uv1);
+         fixed4 c2 = UNITY_SAMPLE_TEX2D_SAMPLER(_Tex2, _Tex1, uv2);
          #endif
 
          
@@ -92,10 +92,10 @@ Shader "VertexPainter/SplatBlend_2Layer"
          #if _FLOW2
             b1 *= _FlowAlpha;
             #if _FLOWREFRACTION && _NORMALMAP
-               half4 rn = FETCH_TEX2 (_Normal2, uv2) - 0.5;
+               half4 rn = FETCH_TEX2 (_Normal2, _Normal1, uv2) - 0.5;
                uv1 += rn.xy * b1 * _FlowRefraction;
                #if !_PARALLAXMAP 
-                  c1 = FETCH_TEX1(_Tex1, uv1);
+                  c1 = FETCH_TEX1(_Tex1, _Tex1, uv1);
                #endif
             #endif
          #endif
@@ -106,8 +106,8 @@ Shader "VertexPainter/SplatBlend_2Layer"
          float2 offset = ParallaxOffset (lerp(c1.a, c2.a, b1), parallax, IN.viewDir);
          uv1 += offset;
          uv2 += offset;
-         c1 = FETCH_TEX1(_Tex1, uv1);
-         c2 = FETCH_TEX2(_Tex2, uv2);
+         c1 = FETCH_TEX1(_Tex1, _Tex1, uv1);
+         c2 = FETCH_TEX2(_Tex2, _Tex1, uv2);
          #if (_FLOW1 || _FLOW2 || _FLOW3 || _FLOW4 || _FLOW5)
          fuv1 += offset;
          fuv2 += offset;
@@ -117,8 +117,8 @@ Shader "VertexPainter/SplatBlend_2Layer"
          fixed4 c = lerp(c1 * _Tint1, c2 * _Tint2, b1);
          
          #if _METALLICGLOSSMAP
-         fixed4 g1 = FETCH_TEX1(_GlossinessTex1, uv1);
-         fixed4 g2 = FETCH_TEX2(_GlossinessTex2, uv2);
+         fixed4 g1 = FETCH_TEX1(_GlossinessTex1, _GlossinessTex1, uv1);
+         fixed4 g2 = FETCH_TEX2(_GlossinessTex2, _GlossinessTex1, uv2);
          fixed4 gf = lerp(g1, g2, b1);
          o.Smoothness = gf.a;
          o.Metallic = gf.r;
@@ -128,14 +128,14 @@ Shader "VertexPainter/SplatBlend_2Layer"
          #endif
          
          #if _EMISSION
-         fixed4 e1 = FETCH_TEX1(_Emissive1, uv1);
-         fixed4 e2 = FETCH_TEX2(_Emissive2, uv2);
+         fixed4 e1 = FETCH_TEX1(_Emissive1, _Emissive1, uv1);
+         fixed4 e2 = FETCH_TEX2(_Emissive2, _Emissive1, uv2);
          o.Emission = lerp(e1.rgb * _EmissiveMult1, e2.rgb * _EmissiveMult2, b1);
          #endif
          
          #if _NORMALMAP
-         half4 n1 = FETCH_TEX1 (_Normal1, uv1);
-         half4 n2 = FETCH_TEX2 (_Normal2, uv2);
+         half4 n1 = FETCH_TEX1 (_Normal1, _Normal1, uv1);
+         half4 n2 = FETCH_TEX2 (_Normal2, _Normal1, uv2);
          o.Normal = UnpackNormal(lerp(n1, n2, b1));
          #endif
          o.Albedo = c.rgb;

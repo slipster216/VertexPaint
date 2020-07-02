@@ -2359,11 +2359,10 @@ namespace JBooth.VertexPainterPro
          }
 
          // only paint once per frame
-         if (tab != Tab.Flow && Event.current.type != EventType.Repaint)
+         if (tab != Tab.Flow && Event.current.type != EventType.Repaint && Event.current.type != EventType.MouseMove)
          {
             return;
          }
-
 
          if (jobs.Length > 0 && painting)
          {
@@ -2404,9 +2403,12 @@ namespace JBooth.VertexPainterPro
             }
          }
 
-         // update views
-         sceneView.Repaint();
-         HandleUtility.Repaint();
+        // update views
+        if (Event.current.type != EventType.Repaint)
+        {
+            sceneView.Repaint();
+            HandleUtility.Repaint();
+        }        
       }
    }
 }

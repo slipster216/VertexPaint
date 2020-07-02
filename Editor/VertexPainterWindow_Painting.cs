@@ -2337,7 +2337,7 @@ namespace JBooth.VertexPainterPro
 
          if (brushVisualization == BrushVisualization.Sphere)
          {
-            Handles.SphereCap(0, point, Quaternion.identity, brushSize * 2);
+            Handles.SphereHandleCap(0, point, Quaternion.identity, brushSize * 2, EventType.Repaint);
          }
          else
          {

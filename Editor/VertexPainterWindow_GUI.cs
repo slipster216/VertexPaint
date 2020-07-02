@@ -662,8 +662,10 @@ namespace JBooth.VertexPainterPro
             EndStroke();
          }
 
-         SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
-         SceneView.onSceneGUIDelegate += this.OnSceneGUI;
+         //SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
+         //SceneView.onSceneGUIDelegate += this.OnSceneGUI;
+         SceneView.duringSceneGui -= this.OnSceneGUI;
+         SceneView.duringSceneGui += this.OnSceneGUI;
 
          Undo.undoRedoPerformed -= this.OnUndo;
          Undo.undoRedoPerformed += this.OnUndo;
@@ -691,7 +693,8 @@ namespace JBooth.VertexPainterPro
          UpdateDisplayMode();
          showVertexShader = show;
          DestroyImmediate(VertexInstanceStream.vertexShaderMat);
-         SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
+         //SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
+         SceneView.duringSceneGui -= this.OnSceneGUI;
       }
    }
 }

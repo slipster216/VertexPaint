@@ -1700,7 +1700,7 @@ namespace JBooth.VertexPainterPro
             {
                Handles.color = showVertexColor;
                Vector3 wp = mtx.MultiplyPoint(j.verts[i]);
-               Handles.SphereCap(0, wp, Quaternion.identity, HandleUtility.GetHandleSize(wp) * 0.02f * showVertexSize);
+               Handles.SphereHandleCap(0, wp, Quaternion.identity, HandleUtility.GetHandleSize(wp) * 0.02f * showVertexSize, EventType.Repaint);
 
                if (showNormals)
                {

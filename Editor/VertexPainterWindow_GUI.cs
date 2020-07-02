@@ -696,8 +696,11 @@ namespace JBooth.VertexPainterPro
          UpdateDisplayMode();
          showVertexShader = show;
          DestroyImmediate(VertexInstanceStream.vertexShaderMat);
-         //SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
+#if UNITY_2019_1_OR_NEWER
          SceneView.duringSceneGui -= this.OnSceneGUI;
+#else
+         SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
+#endif
       }
    }
 }

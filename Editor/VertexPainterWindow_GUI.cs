@@ -662,10 +662,13 @@ namespace JBooth.VertexPainterPro
             EndStroke();
          }
 
-         //SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
-         //SceneView.onSceneGUIDelegate += this.OnSceneGUI;
+#if UNITY_2019_1_OR_NEWER
          SceneView.duringSceneGui -= this.OnSceneGUI;
          SceneView.duringSceneGui += this.OnSceneGUI;
+#else
+         SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
+         SceneView.onSceneGUIDelegate += this.OnSceneGUI;
+#endif
 
          Undo.undoRedoPerformed -= this.OnUndo;
          Undo.undoRedoPerformed += this.OnUndo;

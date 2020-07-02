@@ -1700,7 +1700,11 @@ namespace JBooth.VertexPainterPro
             {
                Handles.color = showVertexColor;
                Vector3 wp = mtx.MultiplyPoint(j.verts[i]);
+#if UNITY_5_5_OR_NEWER
                Handles.SphereHandleCap(0, wp, Quaternion.identity, HandleUtility.GetHandleSize(wp) * 0.02f * showVertexSize, EventType.Repaint);
+#else
+               Handles.SphereCap(0, wp, Quaternion.identity, HandleUtility.GetHandleSize(wp) * 0.02f * showVertexSize);
+#endif
 
                if (showNormals)
                {
@@ -2337,7 +2341,11 @@ namespace JBooth.VertexPainterPro
 
          if (brushVisualization == BrushVisualization.Sphere)
          {
+#if UNITY_5_5_OR_NEWER
             Handles.SphereHandleCap(0, point, Quaternion.identity, brushSize * 2, EventType.Repaint);
+#else
+            Handles.SphereCap(0, point, Quaternion.identity, brushSize * 2);
+#endif
          }
          else
          {

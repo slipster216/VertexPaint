@@ -662,8 +662,13 @@ namespace JBooth.VertexPainterPro
             EndStroke();
          }
 
+#if UNITY_2019_1_OR_NEWER
+         SceneView.duringSceneGui -= this.OnSceneGUI;
+         SceneView.duringSceneGui += this.OnSceneGUI;
+#else
          SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
          SceneView.onSceneGUIDelegate += this.OnSceneGUI;
+#endif
 
          Undo.undoRedoPerformed -= this.OnUndo;
          Undo.undoRedoPerformed += this.OnUndo;
@@ -691,7 +696,11 @@ namespace JBooth.VertexPainterPro
          UpdateDisplayMode();
          showVertexShader = show;
          DestroyImmediate(VertexInstanceStream.vertexShaderMat);
+#if UNITY_2019_1_OR_NEWER
+         SceneView.duringSceneGui -= this.OnSceneGUI;
+#else
          SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
+#endif
       }
    }
 }
